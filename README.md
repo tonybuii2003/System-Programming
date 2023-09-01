@@ -159,9 +159,6 @@ In this part of the assignment, you will write a function to validate the argume
 passed to your program via the command line. Your program will treat arguments
 as follows:
 
-- If no flags are provided, you will display the usage and return with an
-`EXIT_FAILURE` return code.
-
 - If the `-h` flag is provided, you will display the usage for the program and
   exit with an `EXIT_SUCCESS` return code.
 
