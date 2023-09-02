@@ -339,7 +339,7 @@ This is done as follows:
 - If the `-n` flag is specified, the second-least significant bit (bit 1)
   is 1.
 
-- If the `-m` flag is specified, the second-least significant bit (bit 2)
+- If the `-m` flag is specified, the third-least significant bit (bit 2)
   is 1.
 
 - If the `-o` flag is specified, the global variable `outlier_name` is
