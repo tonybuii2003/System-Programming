@@ -216,7 +216,7 @@ if any error occurs during the execution of the program, then it will exit with 
 > will help you practice parsing strings and manipulating pointers.*
 
 The usage scenarios for this program are described by the following message,
-which is printed by the program when it is invoked without any arguments:
+which is printed by the program when it is invoked with the `-h` argument:
 
 ```
 USAGE: bin/philo [-h] [-m|-n] [-o <name>]
