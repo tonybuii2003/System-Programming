@@ -20,6 +20,12 @@
  */
 int validargs(int argc, char **argv)
 {
+    printf("%d", argc);
     // TO BE IMPLEMENTED.
+    for (int i = 0; i < argc; i++) {
+        printf("arg %d: %s\n", i, argv[i]);
+    }
+    printf("%d", argv[1]);
+    
     abort();
 }
