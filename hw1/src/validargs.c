@@ -2,7 +2,17 @@
 
 #include "global.h"
 #include "debug.h"
-
+size_t getLen(char *s)
+{
+    int i = 0;
+    size_t length = 0;
+    while (*s != 0)
+    {
+        length += 1;
+        s++;
+    }
+    return length;
+}
 /**
  * @brief Validates command line arguments passed to the program.
  * @details This function will validate all the arguments passed to the
@@ -20,12 +30,36 @@
  */
 int validargs(int argc, char **argv)
 {
-    printf("%d", argc);
-    // TO BE IMPLEMENTED.
-    for (int i = 0; i < argc; i++) {
-        printf("arg %d: %s\n", i, argv[i]);
+    argv++;
+    if (argc > 1 && **argv == '-')
+    {
+        (*argv)++;
+        char selection = **argv;
+        switch (selection)
+        {
+        case 'h':
+            global_options = HELP_OPTION;
+            return 0;
+            break;
+        case 'n':
+            //  then the program reads distance data from the standard input,
+            //  and synthesizes an unrooted tree using the neighbor joining method.
+            global_options = NEWICK_OPTION;
+            return 0;
+            break;
+        case 'm':
+            global_options = MATRIX_OPTION;
+            if (argc > 2)
+            {
+                argv++;
+            }
+            return 0;
+            break;
+        default:
+            return -1;
+        }
     }
-    printf("%d", argv[1]);
-    
-    abort();
+    else if (argc <= 1)
+        return 0;
+    return -1;
 }
