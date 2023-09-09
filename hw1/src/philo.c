@@ -158,8 +158,10 @@ int emit_distance_matrix(FILE *out) {
  *
  * @param out  If non-NULL, an output stream to which to emit the edge data.
  * If NULL, then no edge data is output.
+ * @return 0 in case the output is successfully emitted, otherwise -1
+ * if any error occurred.
  */
-void build_taxonomy(FILE *out) {
+int build_taxonomy(FILE *out) {
     // TO BE IMPLEMENTED
     abort();
 }
