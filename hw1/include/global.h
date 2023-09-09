@@ -152,7 +152,7 @@ extern int validargs(int argc, char **argv);
 
 int read_distance_data(FILE *in);
 void build_taxonomy(FILE *out);
-void emit_newick_format(FILE *out);
-void emit_distance_matrix(FILE *out);
+int emit_newick_format(FILE *out);
+int emit_distance_matrix(FILE *out);
 
 #endif
