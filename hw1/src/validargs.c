@@ -45,6 +45,37 @@ int validargs(int argc, char **argv)
             //  then the program reads distance data from the standard input,
             //  and synthesizes an unrooted tree using the neighbor joining method.
             global_options = NEWICK_OPTION;
+            if (argc > 2)
+            {
+                argv++;
+                if (**argv == '-')
+                {
+                    (*argv)++;
+                    if (**argv == 'o')
+                    {
+                        if (argc > 3)
+                        {
+                            argv++;
+                            if (**argv == '-')
+                            {
+                                return -1;
+                            }
+                            else
+                            {
+                                outlier_name = *argv;
+                            }
+                        }
+                        else
+                        {
+                            return -1;
+                        }
+                    }
+                }
+                else
+                {
+                    return -1;
+                }
+            }
             return 0;
             break;
         case 'm':
@@ -52,6 +83,16 @@ int validargs(int argc, char **argv)
             if (argc > 2)
             {
                 argv++;
+                if (**argv == '-')
+                {
+                    (*argv)++;
+                    if (**argv == 'o')
+                    {
+                        global_options = 0;
+                        return -1;
+                    }
+                }
+                return -1;
             }
             return 0;
             break;
