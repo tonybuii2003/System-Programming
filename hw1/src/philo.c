@@ -52,9 +52,42 @@
  * message to be printed to stderr and -1 to be returned.
  */
 
-int read_distance_data(FILE *in) {
-    // TO BE IMPLEMENTED
-    abort();
+int read_distance_data(FILE *in)
+{
+    if (!in)
+    {
+        return -1;
+    }
+    int c;
+    int count_length = 0;
+    char *input = input_buffer;
+    while ((c = fgetc(in)) != EOF)
+    {
+
+        while (c == '#')
+        {
+            while (((c = fgetc(in)) != '\n' && c != EOF) || c == 0)
+            {
+            }
+            if (c == '\n')
+                c = fgetc(in);
+            if (c == EOF)
+                break;
+        }
+        // printf("char: %c hex: %x\n", c, c);
+        *(input++) = c;
+        count_length += 1;
+        if (count_length > INPUT_MAX)
+            return -1;
+    }
+    *(input++) = 0;
+    printf("Print array:\n");
+    for (int i = 0; i < count_length; i++)
+    {
+        printf("%c", input_buffer[i]);
+    }
+    printf("\n");
+    return 0;
 }
 
 /**
@@ -89,7 +122,8 @@ int read_distance_data(FILE *in) {
  * non-NULL, then it is an error if no leaf node with that name exists
  * in the tree.
  */
-int emit_newick_format(FILE *out) {
+int emit_newick_format(FILE *out)
+{
     // TO BE IMPLEMENTED
     abort();
 }
@@ -111,7 +145,8 @@ int emit_newick_format(FILE *out) {
  * @return 0 in case the output is successfully emitted, otherwise -1
  * if any error occurred.
  */
-int emit_distance_matrix(FILE *out) {
+int emit_distance_matrix(FILE *out)
+{
     // TO BE IMPLEMENTED
     abort();
 }
@@ -161,7 +196,8 @@ int emit_distance_matrix(FILE *out) {
  * @return 0 in case the output is successfully emitted, otherwise -1
  * if any error occurred.
  */
-int build_taxonomy(FILE *out) {
+int build_taxonomy(FILE *out)
+{
     // TO BE IMPLEMENTED
     abort();
 }

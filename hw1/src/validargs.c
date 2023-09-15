@@ -2,17 +2,6 @@
 
 #include "global.h"
 #include "debug.h"
-size_t getLen(char *s)
-{
-    int i = 0;
-    size_t length = 0;
-    while (*s != 0)
-    {
-        length += 1;
-        s++;
-    }
-    return length;
-}
 /**
  * @brief Validates command line arguments passed to the program.
  * @details This function will validate all the arguments passed to the
