@@ -89,7 +89,11 @@ int validargs(int argc, char **argv)
             return -1;
         }
     }
-    else if (argc <= 1)
+    else if (argc == 1)
+    {
+        global_options = 0;
         return 0;
+    }
+
     return -1;
 }

@@ -10,11 +10,22 @@ int main(int argc, char **argv)
     if (validargs(argc, argv))
         USAGE(*argv, EXIT_FAILURE);
 
-    printf("global option: %ld\n", global_options);
     if (global_options == HELP_OPTION)
         USAGE(*argv, EXIT_SUCCESS);
     // TO BE IMPLEMENTED
-    printf("read distance data: %d\n", read_distance_data(stdin));
+    if (global_options == 0)
+    {
+        if (read_distance_data(stdin))
+        {
+            return EXIT_FAILURE;
+        }
+        if (build_taxonomy(stdout))
+        {
+            return EXIT_FAILURE;
+        }
+        return EXIT_SUCCESS;
+    }
+
     return EXIT_FAILURE;
 }
 
