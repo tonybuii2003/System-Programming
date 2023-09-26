@@ -34,6 +34,7 @@ int validargs(int argc, char **argv)
             //  then the program reads distance data from the standard input,
             //  and synthesizes an unrooted tree using the neighbor joining method.
             global_options = NEWICK_OPTION;
+            outlier_name = NULL;
             if (argc > 2)
             {
                 argv++;
@@ -86,6 +87,7 @@ int validargs(int argc, char **argv)
             return 0;
             break;
         default:
+            fprintf(stderr, "Invalid arg format\n");
             return -1;
         }
     }

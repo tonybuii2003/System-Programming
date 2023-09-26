@@ -4,7 +4,7 @@
 #include "debug.h"
 size_t getLen(char *s)
 {
-    int i = 0;
+    long i = 0;
     size_t length = 0;
     while (*s != 0)
     {
@@ -26,7 +26,7 @@ char *str_copy(char *str1, char *str2, int length)
 }
 int equals(char *s1, char *s2)
 {
-    int length = getLen(s2);
+    long length = getLen(s2);
     for (int i = 0; i < length; i++)
     {
         if (*s1 != *s2)
@@ -38,53 +38,98 @@ int equals(char *s1, char *s2)
     }
     return 1;
 }
+/**
+ * @brief  Converts string to float
+ * @details  This function reads the given string
+ * and convert the string to float return -1.0 if not convertable
+ */
 double string_to_float(char *s)
 {
     char *ptr = s;
-    double f = 0.1;
-    double answer = 0;
+    double f = 0;
+    long d = 1;
+    double decimal = 0;
+    long floating = 0;
+    int is_floating = 0;
+
     while (*ptr != 0)
     {
-        if (*ptr >= '0' && *ptr <= '9')
+        if (is_floating == 0)
         {
-            answer = answer * 10.0 + (*ptr - '0');
-            ptr++;
-        }
-        else if (*ptr == '.')
-        {
-            ptr++;
-            while (*ptr >= '0' && *ptr <= '9')
+            if (*ptr >= '0' && *ptr <= '9')
             {
-                answer += (*ptr - '0') * f;
-                f *= 0.1;
+                decimal = decimal * 10 + (*ptr - '0');
                 ptr++;
+            }
+            else if (*ptr == '.')
+            {
+                is_floating += 1;
+                ptr++;
+                continue;
+            }
+            else
+            {
+
+                return -1.0;
             }
         }
         else
         {
-            return -1.0;
+            if (*ptr >= '0' && *ptr <= '9')
+            {
+                floating = floating * 10 + (*ptr - '0');
+                d *= 10;
+                ptr++;
+            }
+            else
+            {
+
+                return -1.0;
+            }
         }
     }
-    return answer;
+
+    return (decimal + (floating / (double)d));
 }
+/**
+ * @brief  Update the sumrow
+ * @details  This function loop over distances by row and get the
+ * sum to that row and put it in row_sums
+ */
 void update_row_sum()
 {
     double ans = 0;
     double *row_sum_ptr = row_sums;
     double *distance_ptr = (double *)distances;
-    for (int i = 0; i < num_active_nodes; i++)
+    for (long i = 0; i < num_active_nodes; i++)
     {
-        int actual_i = *(active_node_map + i);
+        long actual_i = *(active_node_map + i);
         ans = 0;
-        for (int j = 0; j < num_active_nodes; j++)
+        for (long j = 0; j < num_active_nodes; j++)
         {
-            int actual_j = *(active_node_map + j);
+            long actual_j = *(active_node_map + j);
             ans += *(distance_ptr + actual_i * MAX_NODES + actual_j);
             // printf("%lf +", *(distance_ptr + actual_i * MAX_NODES + actual_j));
         }
         // printf("\n");
         *(row_sum_ptr + actual_i) = ans;
     }
+}
+/**
+ * @brief  find the index of node_names
+ * @details  This function reads the given name and find the
+ * name index and return the index, return -1 if not found
+ */
+long find_name_index(char *name)
+{
+    for (long i = 0; i < num_all_nodes; i++)
+    {
+        if (equals(*(node_names + i), name))
+        {
+            return i;
+        }
+    }
+    return -1;
 }
 
 /**
@@ -156,8 +201,6 @@ int read_distance_data(FILE *in)
     double *current_float = (double *)distances;
     while ((c = fgetc(in)) != EOF)
     {
-        // printf("countline: %d\n", count_line);
-        // printf("current char: %c \n", c);
         if (c == '#')
         {
             skip = 1;
@@ -165,7 +208,6 @@ int read_distance_data(FILE *in)
             {
                 c = fgetc(in);
             }
-            // printf("don't\n");
         }
         if (skip == 1)
         {
@@ -173,22 +215,25 @@ int read_distance_data(FILE *in)
             continue;
         }
         if (c == EOF)
+        {
+
             break;
-        // printf("char: %c hex: %x\n", c, c);
+        }
+
         if (count_line == 0)
         {
             if (array_index > INPUT_MAX || input_buffer_index > INPUT_MAX + 1)
+            {
+                fprintf(stderr, "Stack overflow\n");
                 return -1;
+            }
+
             if (c == ',')
             {
                 if (num_taxa != 0)
                 {
-                    // printf("Yes\n");
                     *input = 0;
-                    // printf("current buffer: %s\n", input_buffer);
                     str_copy(*(node_names + array_index), input_buffer, getLen(input_buffer));
-                    // printf("current name: %s\n", *(node_names + array_index));
-                    // printf("array index: %d\n", array_index);
                     array_index++;
                     input = input_buffer;
                     input_buffer_index = 0;
@@ -199,7 +244,6 @@ int read_distance_data(FILE *in)
             {
 
                 *input = c;
-                // printf("current buffer: %s\n", input_buffer);
                 input_buffer_index += 1;
                 input += 1;
             }
@@ -207,12 +251,8 @@ int read_distance_data(FILE *in)
             {
                 if (num_taxa != 0)
                 {
-                    // printf("Yes\n");
                     *input = 0;
-                    // printf("current buffer: %s\n", input_buffer);
                     str_copy(*(node_names + array_index), input_buffer, getLen(input_buffer));
-                    // printf("current name: %s\n", *(node_names + array_index));
-                    // printf("array index: %d\n", array_index);
                     array_index++;
                     input = input_buffer;
                     input_buffer_index = 0;
@@ -222,12 +262,16 @@ int read_distance_data(FILE *in)
 
         if (count_line >= 1)
         {
-            if (count_line > num_taxa)
+            if (prev == '\n' && c == '\n')
             {
+                if (count_line < num_taxa)
+                {
+                    fprintf(stderr, "There is empty line or there are missing data\n");
+                }
 
-                fprintf(stderr, "The distance matrix is not a square matrix\n");
                 return -1;
             }
+
             input = input_buffer;
             if (prev == '\n')
             {
@@ -242,9 +286,6 @@ int read_distance_data(FILE *in)
                     c = fgetc(in);
                 }
                 *input = 0;
-                // printf("Got the name!\n");
-                // printf("current buffer: %s\n", input_buffer);
-                // printf("current node name: %s\n", *(node_names + (count_line - 1)));
                 if (!equals(input_buffer, *(node_names + (count_line - 1))))
                 {
                     fprintf(stderr, "Invalid names with row and column\n");
@@ -262,10 +303,6 @@ int read_distance_data(FILE *in)
                     c = fgetc(in);
                 }
                 *input = 0;
-
-                // printf("matrix address %p\n", &current_float);
-                // printf("current buffer: %s\n", input_buffer);
-                // printf("After converted: %lf\n", string_to_float(input_buffer));
                 if (string_to_float(input_buffer) < 0)
                 {
                     fprintf(stderr, "Invalid distance input\n");
@@ -275,7 +312,6 @@ int read_distance_data(FILE *in)
                 current_float += 1;
                 if (c == '\n')
                 {
-                    // printf("current row: %d\n", current_row);
                     current_row += 1;
                     current_float = (double *)(distances + current_row);
                 }
@@ -284,15 +320,21 @@ int read_distance_data(FILE *in)
         if (c == '\n')
         {
             count_line += 1;
+            if (count_line - 1 == num_taxa)
+                break;
         }
         prev = c;
     }
     current_float = (double *)distances;
 
-    // printf("count_taxa: %d\n", num_taxa);
     num_active_nodes = num_taxa;
     num_all_nodes = num_taxa;
-    // printf("\n");
+    if (count_line - 1 < num_taxa)
+    {
+
+        fprintf(stderr, "The distance matrix is not a square matrix\n");
+        return -1;
+    }
     for (int i = 0; i < num_taxa; i++)
     {
         for (int j = 0; j < num_taxa; j++)
@@ -304,10 +346,84 @@ int read_distance_data(FILE *in)
             }
         }
     }
+    for (int i = 0; i < num_active_nodes; i++)
+    {
+        *(active_node_map + i) = i;
+        (nodes + i)->name = *(node_names + i);
+        (*((nodes + i)->neighbors + 0)) = 0;
+        (*((nodes + i)->neighbors + 1)) = 0;
+        (*((nodes + i)->neighbors + 2)) = 0;
+    }
 
     return 0;
 }
+long get_size(NODE *nei)
+{
+    long count = 0;
+    for (int i = 0; i < 3; i++)
+    {
+        if ((nei + i) != NULL)
+        {
+            count += 1;
+        }
+    }
+    // printf("neisize: %d\n", count);
+    return count;
+}
+void print_newick(NODE *root, NODE *prev, FILE *out)
+{
+    // printf("\ncurrent root: %s\n", root->name);
+    // printf("\ncurrent prev: %s\n", prev->name);
+    double *distance_ptr = (double *)distances;
+    long indexi = find_name_index(root->name);
+    long indexj = find_name_index(prev->name);
+    if ((*(root->neighbors)) == NULL && (*(root->neighbors + 2)) == NULL)
+    {
+        fprintf(out, "%s:%.2f", root->name, *(distance_ptr + indexi * MAX_NODES + indexj));
+        // printf("%s %s\n", root->name, ((*root->neighbors + 1))->name);
+        return;
+    }
+    fprintf(out, "(");
+    int num_printed = 0;
+    if (prev != *(root->neighbors + 1))
+    {
 
+        // printf("current nei:%s\n", (*(root->neighbors + 2))->name);
+        if (num_printed > 0)
+        {
+            fprintf(out, ",");
+        }
+        print_newick(*(root->neighbors + 1), root, out);
+        num_printed++;
+    }
+    if (prev != *(root->neighbors + 0))
+    {
+        if (num_printed > 0)
+        {
+            fprintf(out, ",");
+        }
+        // printf("current nei:%s\n", (*(root->neighbors + 0))->name);
+        print_newick(*(root->neighbors + 0), root, out);
+        // printf("done!\n");
+        num_printed++;
+    }
+
+    if (prev != *(root->neighbors + 2))
+    {
+        if (num_printed > 0)
+        {
+            fprintf(out, ",");
+        }
+        // fprintf(out, ",");
+        //  printf("current nei:%s\n", (*(root->neighbors + 2))->name);
+        print_newick(*(root->neighbors + 2), root, out);
+        // printf("done!\n");
+        num_printed++;
+    }
+    fprintf(out, ")");
+    // fprintf(out, ",");
+    fprintf(out, "%s:%.2f", root->name, *(distance_ptr + indexi * MAX_NODES + indexj));
+}
 /**
  * @brief  Emit a representation of the phylogenetic tree in Newick
  * format to a specified output stream.
@@ -343,7 +459,53 @@ int read_distance_data(FILE *in)
 int emit_newick_format(FILE *out)
 {
     // TO BE IMPLEMENTED
-    abort();
+    // find the outliner
+
+    double current_max = -1 * 0x7FEFFFFFFFFFFFFF;
+    double *distances_ptr = (double *)distances;
+    long out_index;
+    // for (long i = 0; i < num_all_nodes; i++)
+    // {
+    //     printf("%s->", (nodes + i)->name);
+    //     NODE *nei = (NODE *)(nodes + i)->neighbors;
+
+    //     for (long j = 0; j < 3; j++)
+    //     {
+    //         if ((*((nodes + i)->neighbors + j)) == NULL)
+    //         {
+    //             printf("null,");
+    //         }
+    //         else
+    //         {
+    //             printf("%s,", (*((nodes + i)->neighbors + j))->name);
+    //         }
+    //     }
+    //     printf("\n");
+    // }
+    // printf("\n");
+    if (outlier_name == NULL)
+    {
+        for (long i = 0; i < num_all_nodes; i++)
+        {
+            for (long j = 0; j < num_all_nodes; j++)
+            {
+                if (current_max < *(distances_ptr + i * MAX_NODES + j))
+                {
+                    current_max = *(distances_ptr + i * MAX_NODES + j);
+                    outlier_name = *(node_names + i);
+                }
+            }
+        }
+    }
+    out_index = find_name_index(outlier_name);
+    if (out_index == -1)
+    {
+        fprintf(stderr, "Ouliner not found\n");
+        return -1;
+    }
+    print_newick(*((nodes + out_index)->neighbors + 1), (nodes + out_index), out);
+    fprintf(out, "\n");
+    return 0;
 }
 
 /**
@@ -365,8 +527,23 @@ int emit_newick_format(FILE *out)
  */
 int emit_distance_matrix(FILE *out)
 {
+    double *distance_ptr = (double *)distances;
     // TO BE IMPLEMENTED
-    abort();
+    for (int i = 0; i < num_all_nodes; i++)
+    {
+        printf(",%s", *(node_names + i));
+    }
+    printf("\n");
+    for (int i = 0; i < num_all_nodes; i++)
+    {
+        printf("%s", *(node_names + i));
+        for (int j = 0; j < num_all_nodes; j++)
+        {
+            printf(",%.2f", *(distance_ptr + i * MAX_NODES + j));
+        }
+        printf("\n");
+    }
+    return 0;
 }
 
 /**
@@ -417,46 +594,21 @@ int emit_distance_matrix(FILE *out)
 int build_taxonomy(FILE *out)
 {
     char *input = input_buffer;
+    int buffer_index = 0;
     double current_q = 0x7FEFFFFFFFFFFFFF;
     double tmp = 0;
-    // int q_i = 0;
-    // int q_j = 0;
     int qindexi = 0;
     int qindexj = 0;
     double *row_sum_ptr = row_sums;
 
     // printf("num active nodes: %d\n", num_active_nodes);
     double *ptr = (double *)(distances);
-
-    for (int i = 0; i < num_active_nodes; i++)
-    {
-        *(active_node_map + i) = i;
-    }
     int actual_i = 0;
     int actual_j = 0;
     while (num_active_nodes != 2)
     {
         current_q = 0x7FEFFFFFFFFFFFFF;
         current_q = 0;
-        // //printf("Current active nodes:\n");
-        // for (int i = 0; i < num_active_nodes; i++)
-        // {
-        //     printf("%d, ", *(active_node_map + i));
-        // }
-        // printf("\n");
-        // printf("Current distance matrix:\n");
-
-        // ptr = (double *)(distances);
-        // for (int i = 0; i < num_all_nodes; i++)
-        // {
-        //     // int dis_i = *(active_node_map + i);
-        //     // printf("dis_i: %d\n", dis_i);
-        //     for (int j = 0; j < num_all_nodes; j++)
-        //     {
-        //         printf("%lf ", *(ptr + MAX_NODES * i + j));
-        //     }
-        //     printf("\n");
-        // }
 
         update_row_sum();
         row_sum_ptr = row_sums;
@@ -467,7 +619,7 @@ int build_taxonomy(FILE *out)
 
         for (int i = 0; i < num_active_nodes; i++)
         {
-            double *ptr_dm = (double *)(distances + i * MAX_NODES);
+            // double *ptr_dm = (double *)(distances + i * MAX_NODES);
             for (int j = 0; j < num_active_nodes; j++)
             {
                 actual_i = *(active_node_map + i);
@@ -490,19 +642,28 @@ int build_taxonomy(FILE *out)
         actual_i = *(active_node_map + qindexi);
         actual_j = *(active_node_map + qindexj);
         // printf("%s %s \n", *(node_names + actual_i), *(node_names + actual_j));
+        // printf("%s %s \n", (nodes + actual_i)->name, (nodes + actual_j)->name);
         char *name_ptr = (char *)node_names;
         // once you got the q create a new node to connect 2 q(i,j)
         NODE *new_node = (nodes + num_all_nodes);
         input = input_buffer;
+        buffer_index = 0;
         *input = '#';
         input++;
+        buffer_index += 1;
         int tmp_all_node = num_all_nodes;
         while (tmp_all_node != 0)
         {
+            if (buffer_index > (INPUT_MAX + 1))
+            {
+                fprintf(stderr, "Buffer overflow:%s\n", input_buffer);
+                return -1;
+            }
             // printf("cahr: %d\n", (tmp_all_node) + '0');
             *input = ((tmp_all_node % 10) + '0');
             tmp_all_node = tmp_all_node / 10;
             input++;
+            buffer_index += 1;
         }
         *input = 0;
         input = input_buffer;
@@ -510,16 +671,18 @@ int build_taxonomy(FILE *out)
         str_copy(*(node_names + num_all_nodes), input_buffer, getLen((input_buffer)));
         new_node->name = *(node_names + num_all_nodes);
 
-        int nodes_length = (int)sizeof(new_node->neighbors) / sizeof(NODE);
-        NODE *ptr_nei = (NODE *)new_node->neighbors;
-
         // insert the 2 node
-        NODE *first_node = (NODE *)(nodes + actual_i);
-        *ptr_nei = *first_node;
-        NODE *second_node = (NODE *)(nodes + actual_j);
-        *(ptr_nei + 2) = *second_node;
-        // update distance matrix
-        // printf("Update distance matrix:\n");
+        // printf("Inserting node %d, %d, %s, %s into %s\n", actual_i, actual_j, (nodes + actual_i)->name, (nodes + actual_j)->name, (nodes + num_all_nodes)->name);
+        (*((nodes + num_all_nodes)->neighbors + 0)) = (nodes + actual_i);
+        (*((nodes + num_all_nodes)->neighbors + 1)) = 0;
+        (*((nodes + num_all_nodes)->neighbors + 2)) = (nodes + actual_j);
+
+        (*((nodes + actual_i)->neighbors + 1)) = (nodes + num_all_nodes);
+        (*((nodes + actual_j)->neighbors + 1)) = (nodes + num_all_nodes);
+        // printf("current neighbor[0]: %s\n", (*((nodes + num_all_nodes)->neighbors + 0))->name);
+        //((nodes + num_all_nodes)->neighbors + 2) = (nodes + actual_j);
+        //  update distance matrix
+        //  printf("Update distance matrix:\n");
         ptr = (double *)(distances);
         for (int i = 0; i < num_active_nodes; i++)
         {
@@ -534,14 +697,20 @@ int build_taxonomy(FILE *out)
             {
 
                 // printf("D(%s, %s) = %lf + (%lf - %lf) / (%d - 2))/2 = %lf\n", *(node_names + u), *(node_names + k), *(ptr + actual_i * MAX_NODES + actual_j), *(row_sum_ptr + actual_i), *(row_sum_ptr + actual_j), num_active_nodes, (*(ptr + actual_i * MAX_NODES + actual_j) + (*(row_sum_ptr + actual_i) - *(row_sum_ptr + actual_j)) / (num_active_nodes - 2)) / 2);
-                *(ptr + u * MAX_NODES + k) = (*(ptr + actual_i * MAX_NODES + actual_j) + (*(row_sum_ptr + actual_i) - *(row_sum_ptr + actual_j)) / (num_active_nodes - 2)) / 2;
-                fprintf(out, "%d,%d,%.2f\n", k, u, *(ptr + u * MAX_NODES + k));
+                *(ptr + u * MAX_NODES + k) = *(ptr + k * MAX_NODES + u) = (*(ptr + actual_i * MAX_NODES + actual_j) + (*(row_sum_ptr + actual_i) - *(row_sum_ptr + actual_j)) / (num_active_nodes - 2)) / 2;
+                if (global_options == 0)
+                {
+                    fprintf(out, "%d,%d,%.2f\n", k, u, *(ptr + u * MAX_NODES + k));
+                }
             }
             else if (k == actual_j)
             {
                 // printf("D(%s, %s) = %lf + (%lf - %lf) / (%d - 2))/2 = %lf\n", *(node_names + u), *(node_names + k), *(ptr + actual_i * MAX_NODES + actual_j), *(row_sum_ptr + actual_j), *(row_sum_ptr + actual_i), num_active_nodes, (*(ptr + actual_i * MAX_NODES + actual_j) + (*(row_sum_ptr + actual_j) - *(row_sum_ptr + actual_i)) / (num_active_nodes - 2)) / 2);
-                *(ptr + u * MAX_NODES + k) = (*(ptr + actual_i * MAX_NODES + actual_j) + (*(row_sum_ptr + actual_j) - *(row_sum_ptr + actual_i)) / (num_active_nodes - 2)) / 2;
-                fprintf(out, "%d,%d,%.2f\n", k, u, *(ptr + u * MAX_NODES + k));
+                *(ptr + u * MAX_NODES + k) = *(ptr + k * MAX_NODES + u) = (*(ptr + actual_i * MAX_NODES + actual_j) + (*(row_sum_ptr + actual_j) - *(row_sum_ptr + actual_i)) / (num_active_nodes - 2)) / 2;
+                if (global_options == 0)
+                {
+                    fprintf(out, "%d,%d,%.2f\n", k, u, *(ptr + u * MAX_NODES + k));
+                }
             }
             else
             {
@@ -586,9 +755,15 @@ int build_taxonomy(FILE *out)
     actual_i = *(active_node_map + qindexi);
     actual_j = *(active_node_map + qindexj);
     // printf("%s %s \n", *(node_names + actual_i), *(node_names + actual_j));
+
+    (*((nodes + actual_i)->neighbors + 1)) = (nodes + actual_j);
+    (*((nodes + actual_j)->neighbors + 1)) = (nodes + actual_i);
     int k = actual_j;
     int u = actual_i;
-    fprintf(out, "%d,%d,%.2f\n", k, u, *(ptr + u * MAX_NODES + k));
+    if (global_options == 0)
+    {
+        fprintf(out, "%d,%d,%.2f\n", k, u, *(ptr + u * MAX_NODES + k));
+    }
 
     return 0;
 }

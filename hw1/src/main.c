@@ -25,6 +25,39 @@ int main(int argc, char **argv)
         }
         return EXIT_SUCCESS;
     }
+    if (global_options == MATRIX_OPTION)
+    {
+        if (read_distance_data(stdin))
+        {
+            return EXIT_FAILURE;
+        }
+        if (build_taxonomy(stdout))
+        {
+            return EXIT_FAILURE;
+        }
+        if (emit_distance_matrix(stdout))
+        {
+            return EXIT_FAILURE;
+        }
+        return EXIT_SUCCESS;
+    }
+    if (global_options == NEWICK_OPTION)
+    {
+        if (read_distance_data(stdin))
+        {
+            return EXIT_FAILURE;
+        }
+        if (build_taxonomy(stdout))
+        {
+            return EXIT_FAILURE;
+        }
+        if (emit_newick_format(stdout))
+        {
+            return EXIT_FAILURE;
+        }
+
+        return EXIT_SUCCESS;
+    }
 
     return EXIT_FAILURE;
 }
