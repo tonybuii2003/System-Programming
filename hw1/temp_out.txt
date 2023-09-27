@@ -1,0 +1,181 @@
+global option: 4
+countline: 0
+current char: # 
+don't
+countline: 0
+current char: # 
+don't
+countline: 0
+current char: # 
+don't
+countline: 0
+current char: # 
+don't
+countline: 0
+current char: , 
+countline: 0
+current char: T 
+countline: 0
+current char: o 
+countline: 0
+current char: n 
+countline: 0
+current char: y 
+countline: 0
+current char: , 
+countline: 0
+current char: H 
+countline: 0
+current char: a 
+countline: 0
+current char: o 
+countline: 0
+current char: , 
+countline: 0
+current char: B 
+countline: 0
+current char: e 
+countline: 0
+current char: n 
+countline: 0
+current char: n 
+countline: 0
+current char: y 
+countline: 0
+current char: , 
+countline: 0
+current char: D 
+countline: 0
+current char: a 
+countline: 0
+current char: n 
+countline: 0
+current char: 
+ 
+countline: 1
+current char: T 
+Got the name!
+current buffer: Tony
+current node name: Tony
+Matched!
+countline: 1
+current char: 0 
+Got the float!
+matrix address 0x7ffdaec3b4f0
+current buffer: 0
+After converted: 0.000000
+countline: 1
+current char: 4 
+Got the float!
+matrix address 0x7ffdaec3b4f0
+current buffer: 4
+After converted: 4.000000
+countline: 1
+current char: 5 
+Got the float!
+matrix address 0x7ffdaec3b4f0
+current buffer: 5
+After converted: 5.000000
+countline: 1
+current char: 1 
+Got the float!
+matrix address 0x7ffdaec3b4f0
+current buffer: 10
+After converted: 10.000000
+current row: 0
+countline: 2
+current char: H 
+Got the name!
+current buffer: Hao
+current node name: Hao
+Matched!
+countline: 2
+current char: 4 
+Got the float!
+matrix address 0x7ffdaec3b4f0
+current buffer: 4
+After converted: 4.000000
+countline: 2
+current char: 0 
+Got the float!
+matrix address 0x7ffdaec3b4f0
+current buffer: 0
+After converted: 0.000000
+countline: 2
+current char: 7 
+Got the float!
+matrix address 0x7ffdaec3b4f0
+current buffer: 7
+After converted: 7.000000
+countline: 2
+current char: 1 
+Got the float!
+matrix address 0x7ffdaec3b4f0
+current buffer: 12
+After converted: 12.000000
+current row: 1
+countline: 3
+current char: B 
+Got the name!
+current buffer: Benny
+current node name: Benny
+Matched!
+countline: 3
+current char: 5 
+Got the float!
+matrix address 0x7ffdaec3b4f0
+current buffer: 5
+After converted: 5.000000
+countline: 3
+current char: 7 
+Got the float!
+matrix address 0x7ffdaec3b4f0
+current buffer: 7
+After converted: 7.000000
+countline: 3
+current char: 0 
+Got the float!
+matrix address 0x7ffdaec3b4f0
+current buffer: 0
+After converted: 0.000000
+countline: 3
+current char: 9 
+Got the float!
+matrix address 0x7ffdaec3b4f0
+current buffer: 9
+After converted: 9.000000
+current row: 2
+countline: 4
+current char: D 
+Got the name!
+current buffer: Dan
+current node name: Dan
+Matched!
+countline: 4
+current char: 1 
+Got the float!
+matrix address 0x7ffdaec3b4f0
+current buffer: 10
+After converted: 10.000000
+countline: 4
+current char: 1 
+Got the float!
+matrix address 0x7ffdaec3b4f0
+current buffer: 12
+After converted: 12.000000
+countline: 4
+current char: 9 
+Got the float!
+matrix address 0x7ffdaec3b4f0
+current buffer: 9
+After converted: 9.000000
+countline: 4
+current char: 0 
+Got the float!
+matrix address 0x7ffdaec3b4f0
+current buffer: 0
+After converted: 0.000000
+current row: 3
+count_taxa: 4
+
+read distance data: 0

@@ -11,33 +11,34 @@
  * USAGE macro to be called from main() to print a help message and exit
  * with a specified exit status.
  */
-#define USAGE(program_name, retcode) do { \
-fprintf(stderr, "USAGE: %s %s\n", program_name, \
-"[-h] [-m|-n] [-o <name>]\n" \
-"   -h         Help: displays this help menu.\n" \
-"   -m         Output matrix of estimated distances, instead of edge data.\n" \
-"   -n         Output tree in Newick format, instead of edge data.\n" \
-"   -o <name>  Use <name> as the name of the outlier node to use for Newick output\n" \
-"              (only permitted if -n has already appeared).\n" \
-"\n" \
-"If -h is specified, then it must be the first option on the command line, and any\n"\
-"other options are ignored.\n" \
-"\n" \
-"If -h is not specified, then the program reads distance data from the standard input,\n" \
-"and synthesizes an unrooted tree using the neighbor joining method.  The default\n" \
-"behavior of the program is to output the edges in the synthesized tree to the standard output.\n" \
-"\n" \
-"If -m is specified, then the final matrix of estimated node distances is output to\n" \
-"to the standard output, instead of the edge data.\n" \
-"\n" \
-"If -n is specified, then a representation of the synthesized tree in Newick format is output\n" \
-"to the standard output, instead of the edge data.  The -o option, which is only permitted\n" \
-"after -n, is used to specify the name of an 'outlier' node to be used in constructing a rooted\n" \
-"tree for Newick output.\n" \
-"\n" \
-); \
-exit(retcode); \
-} while(0)
+#define USAGE(program_name, retcode)                                                                               \
+    do                                                                                                             \
+    {                                                                                                              \
+        fprintf(stderr, "USAGE: %s %s\n", program_name,                                                            \
+                "[-h] [-m|-n] [-o <name>]\n"                                                                       \
+                "   -h         Help: displays this help menu.\n"                                                   \
+                "   -m         Output matrix of estimated distances, instead of edge data.\n"                      \
+                "   -n         Output tree in Newick format, instead of edge data.\n"                              \
+                "   -o <name>  Use <name> as the name of the outlier node to use for Newick output\n"              \
+                "              (only permitted if -n has already appeared).\n"                                     \
+                "\n"                                                                                               \
+                "If -h is specified, then it must be the first option on the command line, and any\n"              \
+                "other options are ignored.\n"                                                                     \
+                "\n"                                                                                               \
+                "If -h is not specified, then the program reads distance data from the standard input,\n"          \
+                "and synthesizes an unrooted tree using the neighbor joining method.  The default\n"               \
+                "behavior of the program is to output the edges in the synthesized tree to the standard output.\n" \
+                "\n"                                                                                               \
+                "If -m is specified, then the final matrix of estimated node distances is output to\n"             \
+                "to the standard output, instead of the edge data.\n"                                              \
+                "\n"                                                                                               \
+                "If -n is specified, then a representation of the synthesized tree in Newick format is output\n"   \
+                "to the standard output, instead of the edge data.  The -o option, which is only permitted\n"      \
+                "after -n, is used to specify the name of an 'outlier' node to be used in constructing a rooted\n" \
+                "tree for Newick output.\n"                                                                        \
+                "\n");                                                                                             \
+        exit(retcode);                                                                                             \
+    } while (0)
 
 /*
  * Options info, set by validargs.
@@ -54,9 +55,9 @@ char *diff_filename;
  * Bits that are OR-ed in to global_options to specify various modes of
  * operation.
  */
-#define HELP_OPTION      (0x00000001)
-#define NEWICK_OPTION    (0x00000002)
-#define MATRIX_OPTION    (0x00000004)
+#define HELP_OPTION (0x00000001)
+#define NEWICK_OPTION (0x00000002)
+#define MATRIX_OPTION (0x00000004)
 
 /* Name of a leaf node to be used as an "outlier", otherwise NULL. */
 char *outlier_name;
@@ -69,7 +70,7 @@ char *outlier_name;
  * for each character of input, plus one additional entry to hold
  * a null character ('\0') as required to turn the contents into a C string.
  */
-char input_buffer[INPUT_MAX+1];
+char input_buffer[INPUT_MAX + 1];
 
 /* Maximum number of taxa (leaf nodes) that can be handled. */
 #define MAX_TAXA 100
@@ -90,7 +91,7 @@ int num_taxa;
 int num_all_nodes;
 
 /* Names associated with nodes. */
-char node_names[MAX_NODES][INPUT_MAX+1];
+char node_names[MAX_NODES][INPUT_MAX + 1];
 
 /* Inter-node distances. */
 double distances[MAX_NODES][MAX_NODES];
@@ -119,7 +120,7 @@ int active_node_map[MAX_NODES];
  * For a leaf node, there is just one adjacent node, which is
  * pointed at by neighbors[0], and other two entries are NULL.
  * For an internal node, there are exactly three adjacent nodes,
- * so all three entries contain a valid pointer.  
+ * so all three entries contain a valid pointer.
  * Since the final tree is unrooted, there is ultimately no particular
  * distinction ("parent" or "child") among the three neighbors of
  * an internal node.  However, as you are creating the tree, you
@@ -130,7 +131,8 @@ int active_node_map[MAX_NODES];
  * are being connected.
  */
 
-typedef struct node {
+typedef struct node
+{
     char *name;
     struct node *neighbors[3];
 } NODE;

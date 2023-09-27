@@ -13,6 +13,19 @@ size_t getLen(char *s)
     }
     return length;
 }
+int reverseNumber(int num)
+{
+    int reversed = 0;
+
+    while (num != 0)
+    {
+        int digit = num % 10;
+        reversed = reversed * 10 + digit;
+        num /= 10;
+    }
+
+    return reversed;
+}
 char *str_copy(char *str1, char *str2, int length)
 {
     for (int i = 0; i < length; i++)
@@ -89,7 +102,7 @@ double string_to_float(char *s)
         }
     }
 
-    return (decimal + (floating / (double)d));
+    return (decimal + ((double)floating / (double)d));
 }
 /**
  * @brief  Update the sumrow
@@ -370,6 +383,7 @@ long get_size(NODE *nei)
     // printf("neisize: %d\n", count);
     return count;
 }
+
 void print_newick(NODE *root, NODE *prev, FILE *out)
 {
     // printf("\ncurrent root: %s\n", root->name);
@@ -651,7 +665,7 @@ int build_taxonomy(FILE *out)
         *input = '#';
         input++;
         buffer_index += 1;
-        int tmp_all_node = num_all_nodes;
+        int tmp_all_node = reverseNumber(num_all_nodes);
         while (tmp_all_node != 0)
         {
             if (buffer_index > (INPUT_MAX + 1))
@@ -665,7 +679,7 @@ int build_taxonomy(FILE *out)
             input++;
             buffer_index += 1;
         }
-        *input = 0;
+        *input = '\0';
         input = input_buffer;
 
         str_copy(*(node_names + num_all_nodes), input_buffer, getLen((input_buffer)));
