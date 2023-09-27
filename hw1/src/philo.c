@@ -123,9 +123,7 @@ void update_row_sum()
         {
             long actual_j = *(active_node_map + j);
             ans += *(distance_ptr + actual_i * MAX_NODES + actual_j);
-            // printf("%lf +", *(distance_ptr + actual_i * MAX_NODES + actual_j));
         }
-        // printf("\n");
         *(row_sum_ptr + actual_i) = ans;
     }
 }
@@ -381,14 +379,11 @@ long get_size(NODE *nei)
             count += 1;
         }
     }
-    // printf("neisize: %d\n", count);
     return count;
 }
 
 void print_newick(NODE *root, NODE *prev, FILE *out)
 {
-    // printf("\ncurrent root: %s\n", root->name);
-    // printf("\ncurrent prev: %s\n", prev->name);
     double *distance_ptr = (double *)distances;
 
     if ((*(root->neighbors)) == NULL && (*(root->neighbors + 2)) == NULL)
@@ -396,15 +391,12 @@ void print_newick(NODE *root, NODE *prev, FILE *out)
         long indexi = find_name_index(root->name);
         long indexj = find_name_index(prev->name);
         fprintf(out, "%s:%.2f", root->name, *(distance_ptr + indexi * MAX_NODES + indexj));
-        // printf("%s %s\n", root->name, ((*root->neighbors + 1))->name);
         return;
     }
     fprintf(out, "(");
     int num_printed = 0;
     if (prev != *(root->neighbors + 1))
     {
-
-        // printf("current nei:%s\n", (*(root->neighbors + 2))->name);
         if (num_printed > 0)
         {
             fprintf(out, ",");
@@ -418,9 +410,7 @@ void print_newick(NODE *root, NODE *prev, FILE *out)
         {
             fprintf(out, ",");
         }
-        // printf("current nei:%s\n", (*(root->neighbors + 0))->name);
         print_newick(*(root->neighbors + 0), root, out);
-        // printf("done!\n");
         num_printed++;
     }
 
@@ -430,16 +420,12 @@ void print_newick(NODE *root, NODE *prev, FILE *out)
         {
             fprintf(out, ",");
         }
-        // fprintf(out, ",");
-        //  printf("current nei:%s\n", (*(root->neighbors + 2))->name);
         print_newick(*(root->neighbors + 2), root, out);
-        // printf("done!\n");
         num_printed++;
     }
     fprintf(out, ")");
     long indexi = find_name_index(root->name);
     long indexj = find_name_index(prev->name);
-    // fprintf(out, ",");
     fprintf(out, "%s:%.2f", root->name, *(distance_ptr + indexi * MAX_NODES + indexj));
 }
 /**
@@ -482,25 +468,6 @@ int emit_newick_format(FILE *out)
     double current_max = -1 * 0x7FEFFFFFFFFFFFFF;
     double *distances_ptr = (double *)distances;
     long out_index;
-    // for (long i = 0; i < num_all_nodes; i++)
-    // {
-    //     printf("%s->", (nodes + i)->name);
-    //     NODE *nei = (NODE *)(nodes + i)->neighbors;
-
-    //     for (long j = 0; j < 3; j++)
-    //     {
-    //         if ((*((nodes + i)->neighbors + j)) == NULL)
-    //         {
-    //             printf("null,");
-    //         }
-    //         else
-    //         {
-    //             printf("%s,", (*((nodes + i)->neighbors + j))->name);
-    //         }
-    //     }
-    //     printf("\n");
-    // }
-    // printf("\n");
     if (outlier_name == NULL)
     {
         for (long i = 0; i < num_all_nodes; i++)
@@ -618,8 +585,6 @@ int build_taxonomy(FILE *out)
     int qindexi = 0;
     int qindexj = 0;
     double *row_sum_ptr = row_sums;
-
-    // printf("num active nodes: %d\n", num_active_nodes);
     double *ptr = (double *)(distances);
     int actual_i = 0;
     int actual_j = 0;
@@ -645,9 +610,8 @@ int build_taxonomy(FILE *out)
 
                 if (i != j)
                 {
-                    // printf("Q(%s%s): %d * %lf - %lf - %lf = ", *(node_names + actual_i), *(node_names + actual_j), (num_active_nodes - 2), *(ptr + actual_i * MAX_NODES + actual_j), *(row_sum_ptr + actual_i), *(row_sum_ptr + actual_j));
+
                     tmp = (num_active_nodes - 2) * *(ptr + actual_i * MAX_NODES + actual_j) - *(row_sum_ptr + actual_i) - *(row_sum_ptr + actual_j);
-                    // printf("%lf\n", (num_active_nodes - 2) * *(ptr + actual_i * MAX_NODES + actual_j) - *(row_sum_ptr + actual_i) - *(row_sum_ptr + actual_j));
                     if (tmp < current_q)
                     {
                         current_q = tmp;
@@ -659,10 +623,7 @@ int build_taxonomy(FILE *out)
         }
         actual_i = *(active_node_map + qindexi);
         actual_j = *(active_node_map + qindexj);
-        // printf("%s %s \n", *(node_names + actual_i), *(node_names + actual_j));
-        // printf("%s %s \n", (nodes + actual_i)->name, (nodes + actual_j)->name);
         char *name_ptr = (char *)node_names;
-        // once you got the q create a new node to connect 2 q(i,j)
         NODE *new_node = (nodes + num_all_nodes);
         input = input_buffer;
         buffer_index = 0;
@@ -677,7 +638,6 @@ int build_taxonomy(FILE *out)
                 fprintf(stderr, "Buffer overflow:%s\n", input_buffer);
                 return -1;
             }
-            // printf("cahr: %d\n", (tmp_all_node) + '0');
             *input = ((tmp_all_node % 10) + '0');
             tmp_all_node = tmp_all_node / 10;
             input++;
@@ -688,25 +648,17 @@ int build_taxonomy(FILE *out)
 
         str_copy(*(node_names + num_all_nodes), input_buffer, getLen((input_buffer)));
         new_node->name = *(node_names + num_all_nodes);
-
-        // insert the 2 node
-        // printf("Inserting node %d, %d, %s, %s into %s\n", actual_i, actual_j, (nodes + actual_i)->name, (nodes + actual_j)->name, (nodes + num_all_nodes)->name);
         (*((nodes + num_all_nodes)->neighbors + 0)) = (nodes + actual_i);
         (*((nodes + num_all_nodes)->neighbors + 1)) = 0;
         (*((nodes + num_all_nodes)->neighbors + 2)) = (nodes + actual_j);
 
         (*((nodes + actual_i)->neighbors + 1)) = (nodes + num_all_nodes);
         (*((nodes + actual_j)->neighbors + 1)) = (nodes + num_all_nodes);
-        // printf("current neighbor[0]: %s\n", (*((nodes + num_all_nodes)->neighbors + 0))->name);
-        //((nodes + num_all_nodes)->neighbors + 2) = (nodes + actual_j);
-        //  update distance matrix
-        //  printf("Update distance matrix:\n");
         ptr = (double *)(distances);
         for (int i = 0; i < num_active_nodes; i++)
         {
             int u = num_all_nodes;
             int k = *(active_node_map + i);
-            // printf("index of node u: %d k: %d\n", u, k);
             if (u == k)
             {
                 *(ptr + u * MAX_NODES + k) = *(ptr + k * MAX_NODES + u) = 0;
@@ -714,7 +666,6 @@ int build_taxonomy(FILE *out)
             else if (k == actual_i)
             {
 
-                // printf("D(%s, %s) = %lf + (%lf - %lf) / (%d - 2))/2 = %lf\n", *(node_names + u), *(node_names + k), *(ptr + actual_i * MAX_NODES + actual_j), *(row_sum_ptr + actual_i), *(row_sum_ptr + actual_j), num_active_nodes, (*(ptr + actual_i * MAX_NODES + actual_j) + (*(row_sum_ptr + actual_i) - *(row_sum_ptr + actual_j)) / (num_active_nodes - 2)) / 2);
                 *(ptr + u * MAX_NODES + k) = *(ptr + k * MAX_NODES + u) = (*(ptr + actual_i * MAX_NODES + actual_j) + (*(row_sum_ptr + actual_i) - *(row_sum_ptr + actual_j)) / (num_active_nodes - 2)) / 2;
                 if (global_options == 0)
                 {
@@ -723,7 +674,6 @@ int build_taxonomy(FILE *out)
             }
             else if (k == actual_j)
             {
-                // printf("D(%s, %s) = %lf + (%lf - %lf) / (%d - 2))/2 = %lf\n", *(node_names + u), *(node_names + k), *(ptr + actual_i * MAX_NODES + actual_j), *(row_sum_ptr + actual_j), *(row_sum_ptr + actual_i), num_active_nodes, (*(ptr + actual_i * MAX_NODES + actual_j) + (*(row_sum_ptr + actual_j) - *(row_sum_ptr + actual_i)) / (num_active_nodes - 2)) / 2);
                 *(ptr + u * MAX_NODES + k) = *(ptr + k * MAX_NODES + u) = (*(ptr + actual_i * MAX_NODES + actual_j) + (*(row_sum_ptr + actual_j) - *(row_sum_ptr + actual_i)) / (num_active_nodes - 2)) / 2;
                 if (global_options == 0)
                 {
@@ -732,18 +682,15 @@ int build_taxonomy(FILE *out)
             }
             else
             {
-                // printf("D(%s, %s) = (%lf + %lf - %lf) / 2 = %lf\n", *(node_names + u), *(node_names + k), *(ptr + actual_i * MAX_NODES + k), *(ptr + actual_j * MAX_NODES + k), *(ptr + actual_i * MAX_NODES + actual_j), (*(ptr + actual_i * MAX_NODES + k) + *(ptr + actual_j * MAX_NODES + k) - *(ptr + actual_i * MAX_NODES + actual_j)) / 2);
                 *(ptr + u * MAX_NODES + k) = *(ptr + k * MAX_NODES + u) = (*(ptr + actual_i * MAX_NODES + k) + *(ptr + actual_j * MAX_NODES + k) - *(ptr + actual_i * MAX_NODES + actual_j)) / 2;
             }
         }
         // update active num node
-        // printf("current num all node: %d\n", num_all_nodes);
         *(active_node_map + qindexi) = num_all_nodes;
         num_all_nodes++;
         *(active_node_map + qindexj) = *(active_node_map + (num_active_nodes - 1));
 
         num_active_nodes--;
-        // printf("Current active node num: %d\n", num_active_nodes);
     }
     // update the last 2 node
 
@@ -758,9 +705,8 @@ int build_taxonomy(FILE *out)
 
             if (i != j)
             {
-                // printf("Q(%s%s): %d * %lf - %lf - %lf = ", *(node_names + actual_i), *(node_names + actual_j), (num_active_nodes - 2), *(ptr + actual_i * MAX_NODES + actual_j), *(row_sum_ptr + actual_i), *(row_sum_ptr + actual_j));
+
                 tmp = (num_active_nodes - 2) * *(ptr + actual_i * MAX_NODES + actual_j) - *(row_sum_ptr + actual_i) - *(row_sum_ptr + actual_j);
-                // printf("%lf\n", (num_active_nodes - 2) * *(ptr + actual_i * MAX_NODES + actual_j) - *(row_sum_ptr + actual_i) - *(row_sum_ptr + actual_j));
                 if (tmp < current_q)
                 {
                     current_q = tmp;
@@ -772,7 +718,6 @@ int build_taxonomy(FILE *out)
     }
     actual_i = *(active_node_map + qindexi);
     actual_j = *(active_node_map + qindexj);
-    // printf("%s %s \n", *(node_names + actual_i), *(node_names + actual_j));
 
     (*((nodes + actual_i)->neighbors + 1)) = (nodes + actual_j);
     (*((nodes + actual_j)->neighbors + 1)) = (nodes + actual_i);
