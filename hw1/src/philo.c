@@ -60,9 +60,9 @@ double string_to_float(char *s)
 {
     char *ptr = s;
     double f = 0;
-    long d = 1;
-    double decimal = 0;
-    long floating = 0;
+    double d = 1;
+    double num = 0;
+    double floating = 0;
     int is_floating = 0;
 
     while (*ptr != 0)
@@ -71,12 +71,12 @@ double string_to_float(char *s)
         {
             if (*ptr >= '0' && *ptr <= '9')
             {
-                decimal = decimal * 10 + (*ptr - '0');
+                num = num * 10 + (*ptr - '0');
                 ptr++;
             }
             else if (*ptr == '.')
             {
-                is_floating += 1;
+                is_floating = 1;
                 ptr++;
                 continue;
             }
@@ -102,8 +102,9 @@ double string_to_float(char *s)
         }
     }
 
-    return (decimal + ((double)floating / (double)d));
+    return (num + (floating / d));
 }
+
 /**
  * @brief  Update the sumrow
  * @details  This function loop over distances by row and get the
@@ -389,10 +390,11 @@ void print_newick(NODE *root, NODE *prev, FILE *out)
     // printf("\ncurrent root: %s\n", root->name);
     // printf("\ncurrent prev: %s\n", prev->name);
     double *distance_ptr = (double *)distances;
-    long indexi = find_name_index(root->name);
-    long indexj = find_name_index(prev->name);
+
     if ((*(root->neighbors)) == NULL && (*(root->neighbors + 2)) == NULL)
     {
+        long indexi = find_name_index(root->name);
+        long indexj = find_name_index(prev->name);
         fprintf(out, "%s:%.2f", root->name, *(distance_ptr + indexi * MAX_NODES + indexj));
         // printf("%s %s\n", root->name, ((*root->neighbors + 1))->name);
         return;
@@ -435,6 +437,8 @@ void print_newick(NODE *root, NODE *prev, FILE *out)
         num_printed++;
     }
     fprintf(out, ")");
+    long indexi = find_name_index(root->name);
+    long indexj = find_name_index(prev->name);
     // fprintf(out, ",");
     fprintf(out, "%s:%.2f", root->name, *(distance_ptr + indexi * MAX_NODES + indexj));
 }
