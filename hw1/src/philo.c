@@ -516,17 +516,17 @@ int emit_distance_matrix(FILE *out)
     // TO BE IMPLEMENTED
     for (int i = 0; i < num_all_nodes; i++)
     {
-        printf(",%s", *(node_names + i));
+        fprintf(out, ",%s", *(node_names + i));
     }
-    printf("\n");
+    fprintf(out, "\n");
     for (int i = 0; i < num_all_nodes; i++)
     {
-        printf("%s", *(node_names + i));
+        fprintf(out, "%s", *(node_names + i));
         for (int j = 0; j < num_all_nodes; j++)
         {
-            printf(",%.2f", *(distance_ptr + i * MAX_NODES + j));
+            fprintf(out, ",%.2f", *(distance_ptr + i * MAX_NODES + j));
         }
-        printf("\n");
+        fprintf(out, "\n");
     }
     return 0;
 }
@@ -688,6 +688,11 @@ int build_taxonomy(FILE *out)
         // update active num node
         *(active_node_map + qindexi) = num_all_nodes;
         num_all_nodes++;
+        if (num_all_nodes == MAX_NODES)
+        {
+            fprintf(stderr, "Nodes is full\n");
+            return -1;
+        }
         *(active_node_map + qindexj) = *(active_node_map + (num_active_nodes - 1));
 
         num_active_nodes--;
