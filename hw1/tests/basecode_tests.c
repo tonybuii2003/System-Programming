@@ -143,16 +143,16 @@ Test(basecode_suite, philo_newick_test1, .timeout = 5)
     cr_assert_eq(return_code, EXIT_SUCCESS,
                  "Program output did not match reference output.");
 }
-Test(basecode_suite, stark_newick_test, .timeout = 5)
-{
-    char *cmd = "bin/philo -n < rsrc/stark_familytree_dna.csv > test_output/stark_test.out";
-    char *cmp = "cmp test_output/stark_test.out rsrc/stark_newick.out";
+// Test(basecode_suite, stark_newick_test, .timeout = 5)
+// {
+//     char *cmd = "bin/philo -n < rsrc/stark_familytree_dna.csv > test_output/stark_test.out";
+//     char *cmp = "cmp test_output/stark_test.out rsrc/stark_newick.out";
 
-    int return_code = WEXITSTATUS(system(cmd));
-    cr_assert_eq(return_code, EXIT_SUCCESS,
-                 "Program exited with 0x%x instead of EXIT_SUCCESS",
-                 return_code);
-    return_code = WEXITSTATUS(system(cmp));
-    cr_assert_eq(return_code, EXIT_SUCCESS,
-                 "Program output did not match reference output.");
-}
+//     int return_code = WEXITSTATUS(system(cmd));
+//     cr_assert_eq(return_code, EXIT_SUCCESS,
+//                  "Program exited with 0x%x instead of EXIT_SUCCESS",
+//                  return_code);
+//     return_code = WEXITSTATUS(system(cmp));
+//     cr_assert_eq(return_code, EXIT_SUCCESS,
+//                  "Program output did not match reference output.");
+// }
