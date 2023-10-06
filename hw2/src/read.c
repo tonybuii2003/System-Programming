@@ -751,6 +751,7 @@ void pushfile()
         expectnewline();
 
         nfile = newifile();
+        nfile->prev = ifile;
         nfile->name = n;
         nfile->line = 1;
         if ((nfile->fd = fopen(n, "r")) == NULL)

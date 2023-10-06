@@ -70,7 +70,7 @@ static struct option_info
      "Suppress printing of students' names."},
     {OUTPUT, "output", 'o', required_argument, "file", "Specify file to be used for output."}};
 
-static char short_options[] = "";
+static char short_options[] = "rcak:n";
 static struct option long_options[14];
 
 static void init_options()
@@ -88,12 +88,12 @@ static void init_options()
         op->has_arg = oip->has_arg;
         op->flag = NULL;
         op->val = oip->val;
-        short_options[i] = oip->chr; // add short_options
+        // short_options[i] = oip->chr; // add short_options
     }
 }
 
 static int report, collate, freqs, quantiles, summaries, moments,
-    scores, composite, histograms, tabsep, nonames;
+    scores, composite, histograms, tabsep, nonames, output;
 
 static void usage();
 
@@ -186,6 +186,10 @@ char *argv[];
                 tabsep++;
                 break;
 
+            case OUTPUT:
+            case 'o':
+
+                break;
             case '?':
                 usage(argv[0]);
                 break;
@@ -254,6 +258,16 @@ char *argv[];
         reportscores(stdout, c, nonames);
     if (tabsep)
         reporttabs(stdout, c); // deleted nonames
+    if (output)
+    {
+        FILE *file_ptr;
+        file_ptr = freopen(argv[optind], "w", stdout);
+        if (file_ptr == NULL)
+        {
+            fprintf(stderr, "Unable to open %s for writing.\n", argv[optind]);
+            errors++;
+        }
+    }
 
     fprintf(stderr, "\nProcessing complete.\n");
     printf("%d warning%s issued.\n", warnings + errors,
@@ -267,7 +281,7 @@ void usage(name) char *name;
 
     fprintf(stderr, "Usage: %s [options] <data file>\n", name);
     fprintf(stderr, "Valid options are:\n");
-    for (unsigned int i = 0; i < 13; i++)
+    for (unsigned int i = 0; i < 14; i++)
     {
         opt = &option_table[i];
         char optchr[5] = {' ', ' ', ' ', ' ', '\0'};

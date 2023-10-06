@@ -1,4 +1,4 @@
-
+#include "error.h"
 /*
  * Data structures to hold per-assignment statistics
  */
@@ -10,12 +10,13 @@
  * and then using the frequency information in that bucket.
  */
 
-typedef struct Freqs {
-        float score;                    /* The raw score */
-        int count;                      /* Frequency for this score */
-        int numless;                    /* Number of scores < this */
-        int numlesseq;                  /* Number of scores <= this */
-        struct Freqs *next;             /* Pointer to next higher score */
+typedef struct Freqs
+{
+        float score;        /* The raw score */
+        int count;          /* Frequency for this score */
+        int numless;        /* Number of scores < this */
+        int numlesseq;      /* Number of scores <= this */
+        struct Freqs *next; /* Pointer to next higher score */
 } Freqs;
 
 /*
@@ -27,42 +28,45 @@ typedef struct Freqs {
  * for each section separately.
  */
 
-typedef struct Sectionstats {
-        Assignment *asgt;               /* Assignment stats are for */
-        Section *section;               /* Section stats are for */
-        int valid;                      /* Number of valid scores */
-        int tallied;                    /* Number of scores tallied */
-        double sum;                     /* Sum of valid scores */
-        double sumsq;                   /* Sum of squares of valid scores */
-        float min;                      /* Minimum valid score */
-        float max;                      /* Maximum valid score */
-        float mean;                     /* Sample mean for valid scores */
-        float stddev;                   /* Sample standard deviation */
-        Freqs *freqs;                   /* Frequency information */
-        struct Sectionstats *next;      /* Pointer to data for next section */
+typedef struct Sectionstats
+{
+        Assignment *asgt;          /* Assignment stats are for */
+        Section *section;          /* Section stats are for */
+        int valid;                 /* Number of valid scores */
+        int tallied;               /* Number of scores tallied */
+        double sum;                /* Sum of valid scores */
+        double sumsq;              /* Sum of squares of valid scores */
+        float min;                 /* Minimum valid score */
+        float max;                 /* Maximum valid score */
+        float mean;                /* Sample mean for valid scores */
+        float stddev;              /* Sample standard deviation */
+        Freqs *freqs;              /* Frequency information */
+        struct Sectionstats *next; /* Pointer to data for next section */
 } Sectionstats;
 
-typedef struct Classstats {
-        Assignment *asgt;               /* The assignment stats are for */
-        int valid;                      /* Number of valid scores */
-        int tallied;                    /* Number of scores tallied */
-        double sum;                     /* Sum of valid scores */
-        double sumsq;                   /* Sum of squares of valid scores */
-        float min;                      /* Minimum valid score */
-        float max;                      /* Maximum valid score */
-        float mean;                     /* Sample mean for valid scores */
-        float stddev;                   /* Sample std deviation */
-        Freqs *freqs;                   /* Frequency information */
-        Sectionstats *sstats;           /* Per-section statistics */
-        struct Classstats *next;        /* Pointer to data for next asgt */
+typedef struct Classstats
+{
+        Assignment *asgt;        /* The assignment stats are for */
+        int valid;               /* Number of valid scores */
+        int tallied;             /* Number of scores tallied */
+        double sum;              /* Sum of valid scores */
+        double sumsq;            /* Sum of squares of valid scores */
+        float min;               /* Minimum valid score */
+        float max;               /* Maximum valid score */
+        float mean;              /* Sample mean for valid scores */
+        float stddev;            /* Sample std deviation */
+        Freqs *freqs;            /* Frequency information */
+        Sectionstats *sstats;    /* Per-section statistics */
+        struct Classstats *next; /* Pointer to data for next asgt */
 } Classstats;
 
 /*
  * The data for a whole class is headed by a "Stats" structure
  */
 
-typedef struct Stats {
-        Classstats *cstats;             /* List of per-assignment data */
+typedef struct Stats
+{
+        Classstats *cstats; /* List of per-assignment data */
 } Stats;
 
 Stats *statistics(Course *c);
