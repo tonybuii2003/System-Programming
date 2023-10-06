@@ -729,6 +729,7 @@ void previousfile()
         if ((prev = ifile->prev) == NULL)
                 fatal("(%s:%d) No previous file.", ifile->name, ifile->line);
         fclose(ifile->fd);
+        free(ifile->name);
         free(ifile);
         ifile = prev;
         fprintf(stderr, " ]");

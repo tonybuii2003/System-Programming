@@ -53,7 +53,7 @@ void stnxt();
 int compare();
 {
         int count, i;
-        Student *sp, **stab;
+        Student *sp, **stab, *my_ans;
 
         sp = s;
         count = 0;
@@ -81,7 +81,11 @@ int compare();
                 sp = stab[i];
         }
         stnxt(sp, NULL);
-        return (stab[0]);
+        my_ans = stab[0];
+
+        free(stab);
+
+        return (my_ans);
 }
 
 /*
