@@ -12,61 +12,61 @@
 #include "allocate.h"
 
 char *memerr = "Unable to allocate memory.";
-
+void fatal(const char *fmt, ...);
 Professor *newprofessor()
 {
         Professor *p;
-        if((p = (Professor *)malloc(sizeof(Professor))) == NULL)
+        if ((p = (Professor *)malloc(sizeof(Professor))) == NULL)
                 fatal(memerr);
-        return(p);
+        return (p);
 }
 
 Assistant *newassistant()
 {
         Assistant *a;
-        if((a = (Assistant *)malloc(sizeof(Assistant))) == NULL)
+        if ((a = (Assistant *)malloc(sizeof(Assistant))) == NULL)
                 fatal(memerr);
-        return(a);
+        return (a);
 }
 
 Student *newstudent()
 {
         Student *s;
-        if((s = (Student *)malloc(sizeof(Student))) == NULL)
+        if ((s = (Student *)malloc(sizeof(Student))) == NULL)
                 fatal(memerr);
-        return(s);
+        return (s);
 }
 
 Section *newsection()
 {
         Section *s;
-        if((s = (Section *)malloc(sizeof(Section))) == NULL)
+        if ((s = (Section *)malloc(sizeof(Section))) == NULL)
                 fatal(memerr);
-        return(s);
+        return (s);
 }
 
 Assignment *newassignment()
 {
         Assignment *a;
-        if((a = (Assignment *)malloc(sizeof(Assignment))) == NULL)
+        if ((a = (Assignment *)malloc(sizeof(Assignment))) == NULL)
                 fatal(memerr);
-        return(a);
+        return (a);
 }
 
 Course *newcourse()
 {
         Course *c;
-        if((c = (Course *)malloc(sizeof(Course))) == NULL)
+        if ((c = (Course *)malloc(sizeof(Course))) == NULL)
                 fatal(memerr);
-        return(c);
+        return (c);
 }
 
 Score *newscore()
 {
         Score *s;
-        if((s = (Score *)malloc(sizeof(Score))) == NULL)
+        if ((s = (Score *)malloc(sizeof(Score))) == NULL)
                 fatal(memerr);
-        return(s);
+        return (s);
 }
 
 char *newstring(tp, size)
@@ -74,51 +74,50 @@ char *tp;
 int size;
 {
         char *s, *cp;
-        if((s = (char *)malloc(size)) == NULL)
+        if ((s = (char *)malloc(size)) == NULL)
                 fatal(memerr);
         cp = s;
-        while(size-- > 0) *cp++ = *tp++;
-        return(s);
+        while (size-- > 0)
+                *cp++ = *tp++;
+        return (s);
 }
 
 Freqs *newfreqs()
 {
         Freqs *f;
-        if((f = (Freqs *)malloc(sizeof(Freqs))) == NULL)
+        if ((f = (Freqs *)malloc(sizeof(Freqs))) == NULL)
                 fatal(memerr);
-        return(f);
+        return (f);
 }
 
 Classstats *newclassstats()
 {
         Classstats *c;
-        if((c = (Classstats *)malloc(sizeof(Classstats))) == NULL)
+        if ((c = (Classstats *)malloc(sizeof(Classstats))) == NULL)
                 fatal(memerr);
-        return(c);
-
+        return (c);
 }
 
 Sectionstats *newsectionstats()
 {
         Sectionstats *s;
-        if((s = (Sectionstats *)malloc(sizeof(Sectionstats))) == NULL)
+        if ((s = (Sectionstats *)malloc(sizeof(Sectionstats))) == NULL)
                 fatal(memerr);
-        return(s);
-
+        return (s);
 }
 
 Stats *newstats()
 {
         Stats *s;
-        if((s = (Stats *)malloc(sizeof(Stats))) == NULL)
+        if ((s = (Stats *)malloc(sizeof(Stats))) == NULL)
                 fatal(memerr);
-        return(s);
+        return (s);
 }
 
 Ifile *newifile()
 {
         Ifile *f;
-        if((f = (Ifile *)malloc(sizeof(Ifile))) == NULL)
+        if ((f = (Ifile *)malloc(sizeof(Ifile))) == NULL)
                 fatal(memerr);
-        return(f);
+        return (f);
 }

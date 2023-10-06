@@ -3,13 +3,15 @@
  * Normalize scores, using the computed statistics.
  */
 
-#include<stddef.h>
-#include<stdio.h>
+#include <stddef.h>
+#include <stdio.h>
+#include "string.h"
 #include "global.h"
 #include "gradedb.h"
 #include "stats.h"
 #include "allocate.h"
 #include "normal.h"
+// void warning(const char *format, ...);
 
 /*
  * Normalize scores:
@@ -20,56 +22,65 @@
  *              options set for that score and for the assignment.
  */
 
-void normalize(c, s)
-Course *c;
-Stats *s;
+void normalize(c) // I deleted s
+    Course *c;
+// Stats *s; delete later
 {
         Student *stp;
         Score *rscp, *nscp;
         Classstats *csp;
         Sectionstats *ssp;
 
-        for(stp = c->roster; stp != NULL; stp = stp->cnext) {
-           stp->normscores = nscp = NULL;
-           for(rscp = stp->rawscores; rscp != NULL; rscp = rscp->next) {
-              csp = rscp->cstats;
-              ssp = rscp->sstats;
-              if(nscp == NULL) {
-                stp->normscores = nscp = newscore();
-                nscp->next = NULL;
-              } else {
-                nscp->next = newscore();
-                nscp = nscp->next;
-                nscp->next = NULL;
-              }
-              nscp->asgt = rscp->asgt;
-              nscp->flag = rscp->flag;
-              nscp->subst = rscp->subst;
-              if(rscp->flag == VALID) {
-                nscp->grade = normal(rscp->grade, csp, ssp);
-              } else {
-                switch(rscp->subst) {
-                case USERAW:
-                        nscp->grade = normal(rscp->grade, csp, ssp);
-                        break;
-                case USENORM:
-                        if(rscp->asgt->npolicy == QUANTILE)
-                                nscp->grade = rscp->qnorm;
+        for (stp = c->roster; stp != NULL; stp = stp->cnext)
+        {
+                stp->normscores = nscp = NULL;
+                for (rscp = stp->rawscores; rscp != NULL; rscp = rscp->next)
+                {
+                        csp = rscp->cstats;
+                        ssp = rscp->sstats;
+                        if (nscp == NULL)
+                        {
+                                stp->normscores = nscp = newscore();
+                                nscp->next = NULL;
+                        }
                         else
-                                nscp->grade = rscp->lnorm;
-                        break;
-                case USELIKEAVG:
-                        nscp->grade = studentavg(stp, csp->asgt->atype);
-                        break;
-                case USECLASSAVG:
-                        if(rscp->asgt->npolicy == QUANTILE)
-                                nscp->grade = 50.0;
+                        {
+                                nscp->next = newscore();
+                                nscp = nscp->next;
+                                nscp->next = NULL;
+                        }
+                        nscp->asgt = rscp->asgt;
+                        nscp->flag = rscp->flag;
+                        nscp->subst = rscp->subst;
+                        if (rscp->flag == VALID)
+                        {
+                                nscp->grade = normal(rscp->grade, csp, ssp);
+                        }
                         else
-                                nscp->grade = rscp->asgt->mean;
-                        break;
+                        {
+                                switch (rscp->subst)
+                                {
+                                case USERAW:
+                                        nscp->grade = normal(rscp->grade, csp, ssp);
+                                        break;
+                                case USENORM:
+                                        if (rscp->asgt->npolicy == QUANTILE)
+                                                nscp->grade = rscp->qnorm;
+                                        else
+                                                nscp->grade = rscp->lnorm;
+                                        break;
+                                case USELIKEAVG:
+                                        nscp->grade = studentavg(stp, csp->asgt->atype);
+                                        break;
+                                case USECLASSAVG:
+                                        if (rscp->asgt->npolicy == QUANTILE)
+                                                nscp->grade = 50.0;
+                                        else
+                                                nscp->grade = rscp->asgt->mean;
+                                        break;
+                                }
+                        }
                 }
-              }
-           }
         }
 }
 
@@ -87,52 +98,63 @@ Sectionstats *ssp;
         int n;
 
         a = csp->asgt;
-        switch(a->npolicy) {
+        switch (a->npolicy)
+        {
         case RAW:
-                return(s);
+                return (s);
         case LINEAR:
-                switch(a->ngroup) {
+                switch (a->ngroup)
+                {
                 case BYCLASS:
-                        if(csp->stddev < EPSILON) {
-                           warning("Std. dev. of %s too small for normalization.",
-                                 csp->asgt->name);
-                           csp->stddev = 2*EPSILON;
-                         }
-                        return(linear(s, csp->mean, csp->stddev, a->mean, a->stddev));
+                        if (csp->stddev < EPSILON)
+                        {
+                                warning("Std. dev. of %s too small for normalization.",
+                                        csp->asgt->name);
+                                csp->stddev = 2 * EPSILON;
+                        }
+                        return (linear(s, csp->mean, csp->stddev, a->mean, a->stddev));
+
                 case BYSECTION:
-                        if(ssp->stddev < EPSILON) {
-                           warning("Std. dev. of %s, section %s too small for normalization.",
-                                 ssp->asgt->name, ssp->section->name);
-                           ssp->stddev = 2*EPSILON;
-                         }
-                        return(linear(s, ssp->mean, ssp->stddev, a->mean, a->stddev));
+                        if (ssp->stddev < EPSILON)
+                        {
+                                warning("Std. dev. of %s, section %s too small for normalization.",
+                                        ssp->asgt->name, ssp->section->name);
+                                ssp->stddev = 2 * EPSILON;
+                        }
+                        return (linear(s, ssp->mean, ssp->stddev, a->mean, a->stddev));
                 }
+                break;
         case SCALE:
-                if(a->max < EPSILON) {
-                  warning("Declared maximum score of %s too small for normalization.",
-                        csp->asgt->name);
-                  a->max = 2*EPSILON;
+                if (a->max < EPSILON)
+                {
+                        warning("Declared maximum score of %s too small for normalization.",
+                                csp->asgt->name);
+                        a->max = 2 * EPSILON;
                 }
-                return(scale(s, a->max, a->scale));
+                return (scale(s, a->max, a->scale));
+                break;
         case QUANTILE:
-                switch(a->ngroup) {
+                switch (a->ngroup)
+                {
                 case BYCLASS:
                         fp = csp->freqs;
                         n = csp->tallied;
-                        if(n == 0) {
-                           warning("Too few scores in %s for quantile normalization.",
-                                   csp->asgt->name);
-                           n = 1;
-                         }
+                        if (n == 0)
+                        {
+                                warning("Too few scores in %s for quantile normalization.",
+                                        csp->asgt->name);
+                                n = 1;
+                        }
                         break;
                 case BYSECTION:
                         fp = ssp->freqs;
                         n = ssp->tallied;
-                        if(n == 0) {
-                           warning("Too few scores in %s, section %s for quantile normalization.",
-                                 ssp->asgt->name, ssp->section->name);
-                           n = 1;
-                         }
+                        if (n == 0)
+                        {
+                                warning("Too few scores in %s, section %s for quantile normalization.",
+                                        ssp->asgt->name, ssp->section->name);
+                                n = 1;
+                        }
                         break;
                 }
                 /*
@@ -142,13 +164,15 @@ Sectionstats *ssp;
                  * to the greatest valid score in the table that is < s.
                  */
 
-                for( ; fp != NULL; fp = fp->next) {
-                   if(s < fp->score)
-                        return((float)fp->numless*100.0/n);
-                   else if(s == fp->score)
-                        return((float)fp->numless*100.0/n);
+                for (; fp != NULL; fp = fp->next)
+                {
+                        if (s < fp->score)
+                                return ((float)fp->numless * 100.0 / n);
+                        else if (s == fp->score)
+                                return ((float)fp->numless * 100.0 / n);
                 }
         }
+        return s;
 }
 
 /*
@@ -163,7 +187,7 @@ Sectionstats *ssp;
 float linear(s, rm, rd, nm, nd)
 double s, rm, rd, nm, nd;
 {
-        return(nd*(s-rm)/rd + nm);
+        return (nd * (s - rm) / rd + nm);
 }
 
 /*
@@ -175,7 +199,7 @@ double s, rm, rd, nm, nd;
 float scale(s, max, scale)
 double s, max, scale;
 {
-        return(s*scale/max);
+        return (s * scale / max);
 }
 
 /*
@@ -197,27 +221,37 @@ Atype t;
         wp = 0;
         sum = 0.0;
         w = 0.0;
-        for(scp = s->rawscores; scp != NULL; scp = scp->next) {
-           if(!strcmp(scp->asgt->atype, t) &&
-              (scp->flag == VALID || scp->subst == USERAW)) {
-                n++;
-                f = normal(scp->grade, scp->cstats, scp->sstats);
-                if(scp->asgt->wpolicy == WEIGHT) {
-                   wp = 1;
-                   sum += f * scp->asgt->weight;
-                   w += scp->asgt->weight;
-                } else {
-                   sum += f;
+        for (scp = s->rawscores; scp != NULL; scp = scp->next)
+        {
+                if (!strcmp(scp->asgt->atype, t) &&
+                    (scp->flag == VALID || scp->subst == USERAW))
+                {
+                        n++;
+                        f = normal(scp->grade, scp->cstats, scp->sstats);
+                        if (scp->asgt->wpolicy == WEIGHT)
+                        {
+                                wp = 1;
+                                sum += f * scp->asgt->weight;
+                                w += scp->asgt->weight;
+                        }
+                        else
+                        {
+                                sum += f;
+                        }
                 }
-           }
         }
-        if(n == 0 || w == 0.0) {
+        if (n == 0 || w == 0.0)
+        {
                 warning("Student %s %s has no like scores to average,\n%s",
                         s->name, s->surname, "using raw 0.0.");
-                return(0.0);
-        } else {
-                if(wp) return(sum/w);
-                else return(sum/n);
+                return (0.0);
+        }
+        else
+        {
+                if (wp)
+                        return (sum / w);
+                else
+                        return (sum / n);
         }
 }
 
@@ -230,7 +264,7 @@ Atype t;
  */
 
 void composites(c)
-Course *c;
+    Course *c;
 {
         Student *stp;
         Score *scp;
@@ -238,21 +272,26 @@ Course *c;
         float sum;
         int found;
 
-        for(stp = c->roster; stp != NULL; stp = stp->cnext) {
-           sum = 0.0;
-           for(ap = c->assignments; ap != NULL; ap = ap->next) {
-              found = 0;
-              for(scp = stp->normscores; scp != NULL; scp = scp->next) {
-                if(scp->asgt == ap) {
-                   found++;
-                   sum += scp->grade * (ap->wpolicy == WEIGHT? ap->weight: 1.0);
+        for (stp = c->roster; stp != NULL; stp = stp->cnext)
+        {
+                sum = 0.0;
+                for (ap = c->assignments; ap != NULL; ap = ap->next)
+                {
+                        found = 0;
+                        for (scp = stp->normscores; scp != NULL; scp = scp->next)
+                        {
+                                if (scp->asgt == ap)
+                                {
+                                        found++;
+                                        sum += scp->grade * (ap->wpolicy == WEIGHT ? ap->weight : 1.0);
+                                }
+                        }
+                        if (!found)
+                        {
+                                warning("Student %s %s has no score for assignment %s.",
+                                        stp->name, stp->surname, ap->name);
+                        }
                 }
-              }
-              if(!found) {
-                warning("Student %s %s has no score for assignment %s.",
-                        stp->name, stp->surname, ap->name);
-              }
-           }
-           stp->composite = sum;
+                stp->composite = sum;
         }
 }
