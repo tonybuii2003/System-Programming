@@ -374,7 +374,7 @@ Stats *s;
   Student *stp;
   Freqs *fp;
   int col, pct, cnt;
-  int bins[20];
+  int bins[50];
   float min, max, diff;
 
   fprintf(fd, "HISTOGRAMS\n\n");
