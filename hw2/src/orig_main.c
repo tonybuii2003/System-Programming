@@ -264,7 +264,7 @@ char *argv[];
         file_ptr = freopen(filename, "w", stdout);
         if (file_ptr == NULL)
         {
-            fprintf(stderr, "Can't open file");
+            fprintf(stderr, "Can't open file\n");
             errors++;
         }
     }
