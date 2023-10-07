@@ -14,6 +14,7 @@
 #include <sys/types.h>
 #include <time.h>
 #endif
+void histo();
 void reportparams(fd, fn, c) // add void
     FILE *fd;
 char *fn;
@@ -385,7 +386,9 @@ Stats *s;
   /*
    * Tally the scores into bins
    */
-  min = max = 0.0;
+
+  max = 0.0;
+  min = 0.0;
   cnt = 0;
   for (stp = c->roster; stp != NULL; stp = stp->cnext)
   {
@@ -406,7 +409,7 @@ Stats *s;
   /*
    * Print histogram.
    */
-  void histo(); // create a prototype here
+  histo(fd, bins, min, max, cnt); // create a prototype here
   /*
    * Now do assignment scores.
    */
