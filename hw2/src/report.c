@@ -478,7 +478,7 @@ float min, max;
     for (col = 0; col < 50; col++)
     {
       if (20 * bins[col] > row * cmax)
-        fprintf(fd, "%s", (row == 20) ? "^" : "*");
+        fprintf(fd, "%s", (row == 19) ? "^" : "*");
       else
         fprintf(fd, " ");
     }
