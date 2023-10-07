@@ -388,7 +388,7 @@ Stats *s;
    */
 
   max = 0.0;
-  min = 0.0;
+  min = 100.0;
   cnt = 0;
   for (stp = c->roster; stp != NULL; stp = stp->cnext)
   {
