@@ -193,8 +193,7 @@ char *argv[];
                 if (file_ptr == NULL)
                 {
                     fprintf(stderr, "Can't open file\n");
-                    errors++;
-                    break;
+                    return EXIT_FAILURE;
                 }
                 break;
             case '?':
