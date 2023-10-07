@@ -70,7 +70,7 @@ static struct option_info
      "Suppress printing of students' names."},
     {OUTPUT, "output", 'o', required_argument, "file", "Specify file to be used for output."}};
 
-static char short_options[] = "rcak:n";
+static char short_options[] = "rcak:no:";
 static struct option long_options[14];
 
 static void init_options()
@@ -88,7 +88,6 @@ static void init_options()
         op->has_arg = oip->has_arg;
         op->flag = NULL;
         op->val = oip->val;
-        // short_options[i] = oip->chr; // add short_options
     }
 }
 
@@ -270,6 +269,7 @@ char *argv[];
     }
 
     fprintf(stderr, "\nProcessing complete.\n");
+
     printf("%d warning%s issued.\n", warnings + errors,
            warnings + errors == 1 ? " was" : "s were");
     exit(errors ? EXIT_FAILURE : EXIT_SUCCESS);

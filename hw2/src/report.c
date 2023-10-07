@@ -395,7 +395,7 @@ Stats *s;
       max = stp->composite;
     cnt++;
   }
-  for (col = 0; col < 20; col++)
+  for (col = 0; col < 50; col++)
     bins[col] = 0;
   diff = (max - min == 0.0) ? 1.0 : (max - min);
   for (stp = c->roster; stp != NULL; stp = stp->cnext)
@@ -426,7 +426,7 @@ Stats *s;
     }
     else
       max = csp->asgt->max;
-    for (col = 0; col < 20; col++)
+    for (col = 0; col < 50; col++)
       bins[col] = 0;
     for (fp = csp->freqs; fp != NULL; fp = fp->next)
     {
