@@ -92,7 +92,7 @@ static void init_options()
 }
 
 static int report, collate, freqs, quantiles, summaries, moments,
-    scores, composite, histograms, tabsep, nonames, output;
+    scores, composite, histograms, tabsep, nonames;
 
 static void usage();
 
@@ -105,7 +105,8 @@ char *argv[];
     Course *c;
     Stats *s;
     char optval;
-    char *filename;
+    char *filename = NULL;
+    FILE *file_ptr;
     int (*compare)() = comparename;
 
     fprintf(stderr, BANNER);
@@ -188,7 +189,13 @@ char *argv[];
             case OUTPUT:
             case 'o':
                 filename = optarg;
-                output++;
+                file_ptr = freopen(filename, "w", stdout);
+                if (file_ptr == NULL)
+                {
+                    fprintf(stderr, "Can't open file\n");
+                    errors++;
+                    break;
+                }
                 break;
             case '?':
                 usage(argv[0]);
@@ -258,16 +265,6 @@ char *argv[];
         reportscores(stdout, c, nonames);
     if (tabsep)
         reporttabs(stdout, c); // deleted nonames
-    if (output)
-    {
-        FILE *file_ptr;
-        file_ptr = freopen(filename, "w", stdout);
-        if (file_ptr == NULL)
-        {
-            fprintf(stderr, "Can't open file\n");
-            errors++;
-        }
-    }
 
     fprintf(stderr, "\nProcessing complete.\n");
 
