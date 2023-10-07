@@ -105,6 +105,7 @@ char *argv[];
     Course *c;
     Stats *s;
     char optval;
+    char *filename;
     int (*compare)() = comparename;
 
     fprintf(stderr, BANNER);
@@ -132,7 +133,6 @@ char *argv[];
                 break;
             case NONAMES:
             case 'n':
-
                 nonames++;
                 break;
             case 'k':
@@ -187,7 +187,8 @@ char *argv[];
 
             case OUTPUT:
             case 'o':
-
+                filename = optarg;
+                output++;
                 break;
             case '?':
                 usage(argv[0]);
@@ -260,10 +261,10 @@ char *argv[];
     if (output)
     {
         FILE *file_ptr;
-        file_ptr = freopen(argv[optind], "w", stdout);
+        file_ptr = freopen(filename, "w", stdout);
         if (file_ptr == NULL)
         {
-            fprintf(stderr, "Unable to open %s for writing.\n", argv[optind]);
+            fprintf(stderr, "Can't open file");
             errors++;
         }
     }
