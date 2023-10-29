@@ -164,7 +164,6 @@ int heap_init(size_t size)
 
     epilogue_address = sf_mem_end() - 16;
     size_t wilderness_size = epilogue_address - (prologue_address + prologue_size);
-    // wilderness->header = (wilderness_size << 32) | (wilderness_size & 0xFFFFFFF0) | 0x4;
     wilderness->prev_footer = prologue->header;
     wilderness->header = (wilderness_size & 0xFFFFFFF0) | ((wilderness->prev_footer & 0x8) >> 1);
 
@@ -252,6 +251,8 @@ void *sf_malloc(size_t size)
 void sf_free(void *pp)
 {
     // To be implemented.
+    if (!pp)
+        abort();
     char *allocated_block_address = (char *)(pp - 16);
     sf_block *allocated_block = (sf_block *)allocated_block_address;
     if ((allocated_block->header & 0x8) == 0)
