@@ -43,7 +43,7 @@ long find_free_list(size_t size)
         a = b;
         b = tmp;
     }
-    return -1;
+    return NUM_FREE_LISTS - 1;
 }
 void insert_free_block(sf_block *free_block, long index)
 {
@@ -110,7 +110,8 @@ int extend_heap()
     size_t new_wilderness_size = epilogue_address - mem_grow_addr;
     new_wilderness->header = (new_wilderness_size & 0xFFFFFFF0) | ((new_wilderness->prev_footer & 0x8) >> 1);
     new_wilderness = coalesce(new_wilderness);
-    insert_free_block(new_wilderness, find_free_list(get_size(new_wilderness)));
+    long index = find_free_list(get_size(new_wilderness));
+    insert_free_block(new_wilderness, index);
     return 0;
 }
 int heap_init(size_t size)
@@ -228,9 +229,8 @@ void *sf_malloc(size_t size)
     sf_block *wilderness = (sf_block *)wilderness_address;
     wilderness->header = ((curr_free_size - block_size) & 0xFFFFFFF0) | 0x4;
     wilderness->prev_footer = new_block->header;
-    wilderness->body.links.prev = &sf_free_list_heads[NUM_FREE_LISTS - 1];
-    wilderness->body.links.next = &sf_free_list_heads[NUM_FREE_LISTS - 1];
-    sf_free_list_heads[NUM_FREE_LISTS - 1].body.links.next = wilderness;
+    long index = find_free_list(get_size(wilderness));
+    insert_free_block(wilderness, index);
     sf_block *epilogue = (sf_block *)(epilogue_address);
     epilogue->prev_footer = wilderness->header;
     // sf_show_block(wilderness);
