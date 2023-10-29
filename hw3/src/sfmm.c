@@ -59,6 +59,7 @@ void insert_free_block(sf_block *free_block, long index)
 
     if (selected_block->body.links.next == selected_block)
     {
+
         selected_block->body.links.next = free_block;
         selected_block->body.links.prev = free_block;
         free_block->body.links.prev = selected_block;
@@ -67,7 +68,9 @@ void insert_free_block(sf_block *free_block, long index)
     else
     {
         free_block->body.links.next = selected_block->body.links.next;
-        selected_block->body.links.prev = free_block;
+        free_block->body.links.prev = selected_block;
+        selected_block->body.links.next->body.links.prev = free_block;
+        selected_block->body.links.next = free_block;
     }
 }
 void remove_free_block(sf_block *free_block)
@@ -80,6 +83,7 @@ void remove_free_block(sf_block *free_block)
 sf_block *coalesce(sf_block *free_block)
 {
     sf_block *pre_block = (sf_block *)((char *)free_block - get_prev_size(free_block));
+
     sf_block *next_block = (sf_block *)((char *)free_block + get_size(free_block));
     if ((pre_block->header & 0x8) == 0 && (next_block->header & 0x8) == 0x8)
     {
@@ -127,7 +131,6 @@ int extend_heap()
     epilogue->prev_footer = new_wilderness->header;
     long index = find_free_list(get_size(new_wilderness));
     insert_free_block(new_wilderness, index);
-    sf_show_heap();
     return 0;
 }
 int heap_init(size_t size)
@@ -165,13 +168,10 @@ int heap_init(size_t size)
     wilderness->prev_footer = prologue->header;
     wilderness->header = (wilderness_size & 0xFFFFFFF0) | ((wilderness->prev_footer & 0x8) >> 1);
 
-    //  sf_show_blocks(wilderness);
-
     sf_block *epilogue = (sf_block *)(epilogue_address);
 
     epilogue->prev_footer = wilderness->header;
     epilogue->header = (epilogue_size & 0xFFFFFFF0) | 0x8;
-    // sf_show_blocks(epilogue);
     free_list_init();
     wilderness->body.links.prev = &sf_free_list_heads[NUM_FREE_LISTS - 1];
     wilderness->body.links.next = &sf_free_list_heads[NUM_FREE_LISTS - 1];
@@ -216,8 +216,6 @@ void *sf_malloc(size_t size)
     }
     // To be implemented.
 
-    sf_show_heap();
-
     size_t header = 8;
     size_t footer = 8;
     size_t padding = (16 - (size % 16)) % 16;
@@ -235,7 +233,6 @@ void *sf_malloc(size_t size)
     }
     remove_free_block(freeblock);
     size_t curr_free_size = get_size(freeblock);
-    sf_show_free_lists();
     char *new_block_address = (char *)freeblock;
     sf_block *new_block = (sf_block *)(new_block_address);
     new_block->prev_footer = freeblock->prev_footer;
@@ -249,22 +246,30 @@ void *sf_malloc(size_t size)
     insert_free_block(wilderness, index);
     sf_block *epilogue = (sf_block *)(epilogue_address);
     epilogue->prev_footer = wilderness->header;
-    // sf_show_block(wilderness);
-
-    // sf_show_block(new_block);
-    // printf("\n");
-    // sf_show_block(wilderness);
-    sf_show_heap();
-    // start malloc
-    // long index = find_free_block(size);
-
-    return (void *)new_block->body.payload;
+    return (void *)(&(new_block->body));
 }
 
 void sf_free(void *pp)
 {
     // To be implemented.
-    abort();
+    char *allocated_block_address = (char *)(pp - 16);
+    sf_block *allocated_block = (sf_block *)allocated_block_address;
+    if ((allocated_block->header & 0x8) == 0)
+    {
+        abort();
+    }
+    if ((sf_mem_end() - pp) < 0)
+    {
+        abort();
+    }
+    allocated_block->header = (allocated_block->header & 0xFFFFFFF0) | (allocated_block->header & 0x7);
+    char *next_block_address = (char *)allocated_block + get_size(allocated_block);
+    sf_block *next_block = (sf_block *)next_block_address;
+
+    next_block->prev_footer = allocated_block->header;
+    coalesce(allocated_block);
+    long index = find_free_list(get_size(allocated_block));
+    insert_free_block(allocated_block, index);
 }
 
 void *sf_realloc(void *pp, size_t rsize)
