@@ -29,6 +29,10 @@ size_t get_size(sf_block *block)
 {
     return block->header & 0xFFFFFFF0;
 }
+size_t get_prev_size(sf_block *block)
+{
+    return block->prev_footer & 0xFFFFFFF0;
+}
 long find_free_list(size_t size)
 {
     size_t a = 1;
@@ -71,28 +75,32 @@ void remove_free_block(sf_block *free_block)
 }
 sf_block *coalesce(sf_block *free_block)
 {
-    sf_block *pre_block = (sf_block *)free_block->prev_footer;
-    sf_block *next_block = (sf_block *)(free_block + get_size(free_block));
+    sf_block *pre_block = (sf_block *)((char *)free_block - get_prev_size(free_block));
+    sf_block *next_block = (sf_block *)((char *)free_block + get_size(free_block));
     if ((pre_block->header & 0x8) == 0 && (next_block->header & 0x8) == 0x8)
+    {
+        remove_free_block(pre_block);
+        size_t new_size = get_size(pre_block) + get_size(free_block);
+        pre_block->header = (new_size & 0xFFFFFFF0) | (pre_block->header & 0xF);
+        next_block->prev_footer = pre_block->header;
+        return pre_block;
+    }
+    if ((pre_block->header & 0x8) == 0x8 && (next_block->header & 0x8) == 0)
     {
         remove_free_block(next_block);
         size_t new_size = get_size(next_block) + get_size(free_block);
         free_block->header = (new_size & 0xFFFFFFF0) | (free_block->header & 0xF);
+        next_block->prev_footer = free_block->header;
         return free_block;
     }
-    if ((pre_block->header & 0x8) == 0x8 && (next_block->header & 0x8) == 0)
-    {
-        remove_free_block(pre_block);
-        size_t new_size = get_size(pre_block) + get_size(free_block);
-        free_block->header = (new_size & 0xFFFFFFF0) | (free_block->header & 0xF);
-        return pre_block;
-    }
-    if ((pre_block->header & 0x8) == 0x8 && (next_block->header & 0x8) == 0x8)
+    if ((pre_block->header & 0x8) == 0 && (next_block->header & 0x8) == 0)
     {
         remove_free_block(pre_block);
         remove_free_block(next_block);
         size_t new_size = get_size(pre_block) + get_size(free_block) + get_size(next_block);
-        free_block->header = (new_size & 0xFFFFFFF0) | (free_block->header & 0xF);
+        pre_block->header = (new_size & 0xFFFFFFF0) | (pre_block->header & 0xF);
+        next_block->prev_footer = pre_block->header;
+        return pre_block;
     }
     return free_block;
 }
@@ -104,14 +112,18 @@ int extend_heap()
         return -1;
     }
 
-    sf_block *new_wilderness = (sf_block *)mem_grow_addr;
-    new_wilderness->prev_footer = ((sf_block *)mem_grow_addr)->prev_footer;
+    sf_block *new_wilderness = (sf_block *)(mem_grow_addr - 16);
     epilogue_address = sf_mem_end() - 16;
-    size_t new_wilderness_size = epilogue_address - mem_grow_addr;
+    size_t new_wilderness_size = PAGE_SZ;
     new_wilderness->header = (new_wilderness_size & 0xFFFFFFF0) | ((new_wilderness->prev_footer & 0x8) >> 1);
+    sf_block *epilogue = (sf_block *)(epilogue_address);
+    epilogue->prev_footer = new_wilderness->header;
+    epilogue->header = (8 & 0xFFFFFFF0) | 0x8;
     new_wilderness = coalesce(new_wilderness);
+    epilogue->prev_footer = new_wilderness->header;
     long index = find_free_list(get_size(new_wilderness));
     insert_free_block(new_wilderness, index);
+    sf_show_heap();
     return 0;
 }
 int heap_init(size_t size)
@@ -152,7 +164,7 @@ int heap_init(size_t size)
     //  sf_show_blocks(wilderness);
 
     sf_block *epilogue = (sf_block *)(epilogue_address);
-    // epilogue->header = (epilogue_size << 32) | (epilogue_size & 0xFFFFFFF0) | 0x8;
+
     epilogue->prev_footer = wilderness->header;
     epilogue->header = (epilogue_size & 0xFFFFFFF0) | 0x8;
     // sf_show_blocks(epilogue);
