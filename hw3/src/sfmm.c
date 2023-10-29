@@ -51,6 +51,10 @@ long find_free_list(size_t size)
 }
 void insert_free_block(sf_block *free_block, long index)
 {
+    if (get_size(free_block) == 0)
+    {
+        return;
+    }
     sf_block *selected_block = &sf_free_list_heads[index];
 
     if (selected_block->body.links.next == selected_block)
