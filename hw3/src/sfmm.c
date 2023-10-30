@@ -137,6 +137,7 @@ int heap_init(size_t size)
     size_t block_size = size + header + footer + padding;
     size_t prologue_size = 32;
     size_t epilogue_size = 8;
+    // size_t wilderness_size = PAGE_SZ - prologue_size - epilogue_size;
     if (sf_mem_grow() == NULL)
     {
         return -1;
@@ -147,6 +148,7 @@ int heap_init(size_t size)
     }
 
     prologue_address = sf_mem_start();
+    // char *current_address = sf_mem_start();
     sf_block *prologue = (sf_block *)(prologue_address);
 
     prologue->header = (prologue_size & 0xFFFFFFF0) | 0x8;
@@ -248,7 +250,6 @@ void sf_free(void *pp)
         abort();
     char *allocated_block_address = (char *)(pp - 16);
     sf_block *allocated_block = (sf_block *)allocated_block_address;
-    printf("\n");
     if ((allocated_block->header & 0x8) == 0)
     {
         abort();
@@ -282,10 +283,10 @@ void *sf_realloc(void *pp, size_t rsize)
 
     sf_block *block = (sf_block *)((char *)pp - 16);
     size_t payload_size = (block->header >> 32);
-    printf("\nplsize %lu\n", payload_size);
     size_t header = 8;
     size_t footer = 8;
 
+    // for rsize
     size_t padding = (16 - (rsize % 16)) % 16;
     size_t rblock_size = rsize + header + footer + padding;
     if (rblock_size == get_size(block))
@@ -298,8 +299,7 @@ void *sf_realloc(void *pp, size_t rsize)
     {
         if ((get_size(block) - rblock_size) < M)
         {
-            char *allocated_block_address = (char *)(pp - 16);
-            sf_block *allocated_block = (sf_block *)allocated_block_address;
+
             return (void *)pp;
         }
         if ((get_size(block) - rblock_size) >= M)
