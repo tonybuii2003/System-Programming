@@ -13,6 +13,8 @@ static char *wilderness_address;
 static char *epilogue_address;
 static int heap_initialized = 0;
 static char *prologue_address;
+static size_t blocksize_total = 0;
+static size_t payload_total = 0;
 void free_list_init()
 {
     for (int i = 0; i < NUM_FREE_LISTS; i++)
@@ -214,7 +216,8 @@ void *sf_malloc(size_t size)
     size_t footer = 8;
     size_t padding = (16 - (size % 16)) % 16;
     size_t block_size = size + header + footer + padding;
-
+    blocksize_total += blocksize_total;
+    payload_total += size;
     sf_block *freeblock = find_block(block_size);
 
     while ((freeblock = find_block(block_size)) == NULL)
@@ -262,6 +265,8 @@ void sf_free(void *pp)
     {
         abort();
     }
+    payload_total -= (allocated_block->header << 32);
+    blocksize_total -= get_size(allocated_block);
     allocated_block->header = (allocated_block->header & 0xFFFFFFF0) | (allocated_block->header & 0x7);
     char *next_block_address = (char *)allocated_block + get_size(allocated_block);
     sf_block *next_block = (sf_block *)next_block_address;
@@ -289,10 +294,12 @@ void *sf_realloc(void *pp, size_t rsize)
     // for rsize
     size_t padding = (16 - (rsize % 16)) % 16;
     size_t rblock_size = rsize + header + footer + padding;
+    blocksize_total += rblock_size;
     if (rblock_size == get_size(block))
     {
         block->header &= ~(0xFFFFFFFF);
         block->header |= ((payload_size + padding) << 32);
+        payload_size += payload_size;
         return (void *)pp;
     }
     if (rblock_size < get_size(block))
@@ -335,15 +342,16 @@ void *sf_realloc(void *pp, size_t rsize)
 double sf_fragmentation()
 {
     // To be implemented.
-    abort();
+    size_t heapsize = sf_mem_end() - sf_mem_start();
+    return payload_total / heapsize;
 }
 
 double sf_utilization()
 {
     // To be implemented.
+    return (double)payload_total / blocksize_total;
     if (!heap_initialized)
     {
         return 0.0;
     }
-    abort();
 }
