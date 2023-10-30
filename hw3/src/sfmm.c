@@ -13,12 +13,8 @@ static char *wilderness_address;
 static char *epilogue_address;
 static int heap_initialized = 0;
 static char *prologue_address;
-// extern isMalloc = 0;
 void free_list_init()
 {
-    // long a = 0;
-    // long b = 1;
-    // sf_block *ptr = 32;
     for (int i = 0; i < NUM_FREE_LISTS; i++)
     {
         sf_free_list_heads[i].body.links.next = &sf_free_list_heads[i];
@@ -59,7 +55,6 @@ void insert_free_block(sf_block *free_block, long index)
 
     if (selected_block->body.links.next == selected_block)
     {
-
         selected_block->body.links.next = free_block;
         selected_block->body.links.prev = free_block;
         free_block->body.links.prev = selected_block;
@@ -235,7 +230,7 @@ void *sf_malloc(size_t size)
     char *new_block_address = (char *)freeblock;
     sf_block *new_block = (sf_block *)(new_block_address);
     new_block->prev_footer = freeblock->prev_footer;
-    new_block->header = (block_size << 32) | (block_size & 0xFFFFFFF0) | 0x8 | ((new_block->prev_footer & 0x8) >> 1);
+    new_block->header = ((size + padding) << 32) | (block_size & 0xFFFFFFF0) | 0x8 | ((new_block->prev_footer & 0x8) >> 1);
 
     wilderness_address = (char *)freeblock + block_size;
     sf_block *wilderness = (sf_block *)wilderness_address;
@@ -245,21 +240,28 @@ void *sf_malloc(size_t size)
     insert_free_block(wilderness, index);
     sf_block *epilogue = (sf_block *)(epilogue_address);
     epilogue->prev_footer = wilderness->header;
+    sf_show_heap();
     return (void *)(&(new_block->body));
 }
 
 void sf_free(void *pp)
 {
     // To be implemented.
-    if (!pp)
+    if (pp == NULL)
         abort();
     char *allocated_block_address = (char *)(pp - 16);
     sf_block *allocated_block = (sf_block *)allocated_block_address;
+    sf_show_block(allocated_block);
+    printf("\n");
     if ((allocated_block->header & 0x8) == 0)
     {
         abort();
     }
     if ((sf_mem_end() - pp) < 0)
+    {
+        abort();
+    }
+    if (get_size(allocated_block) < M || get_size(allocated_block) % 16 != 0)
     {
         abort();
     }
@@ -275,8 +277,71 @@ void sf_free(void *pp)
 
 void *sf_realloc(void *pp, size_t rsize)
 {
-    // To be implemented.
-    abort();
+
+    if (!pp)
+    {
+        sf_errno = ENOMEM;
+        return NULL;
+    }
+
+    sf_block *block = (sf_block *)((char *)pp - 16);
+    sf_show_block(block);
+    size_t payload_size = (block->header >> 32);
+    printf("\nplsize %lu\n", payload_size);
+    size_t header = 8;
+    size_t footer = 8;
+
+    // for rsize
+    size_t padding = (16 - (rsize % 16)) % 16;
+    size_t rblock_size = rsize + header + footer + padding;
+    if (rblock_size == get_size(block))
+    {
+        block->header &= ~(0xFFFFFFFF);
+        block->header |= ((payload_size + padding) << 32);
+        return (void *)pp;
+    }
+    if (rblock_size < get_size(block))
+    {
+        if ((get_size(block) - rblock_size) < M)
+        {
+            char *allocated_block_address = (char *)(pp - 16);
+            sf_block *allocated_block = (sf_block *)allocated_block_address;
+            sf_show_block(allocated_block);
+            return (void *)pp;
+        }
+        if ((get_size(block) - rblock_size) >= M)
+        {
+            size_t curr_size = get_size(block);
+            sf_show_heap();
+            block->header = ((rsize + padding) << 32) | (rblock_size & 0xFFFFFFF0) | (block->header & 0xF);
+            sf_show_heap();
+            char *free_block_address = (char *)block + get_size(block);
+            sf_block *free_block = (sf_block *)free_block_address;
+
+            free_block->header = ((curr_size - get_size(block)) & 0xFFFFFFF0) | 0x4;
+            free_block->prev_footer = block->header;
+            sf_show_heap();
+
+            char *next_block_address = (char *)free_block + get_size(free_block);
+            sf_block *next_block = (sf_block *)next_block_address;
+            next_block->prev_footer = free_block->header;
+            sf_show_heap();
+            coalesce(free_block);
+            long index = find_free_list(get_size(free_block));
+            insert_free_block(free_block, index);
+            sf_show_heap();
+            return (void *)pp;
+        }
+    }
+    if (rblock_size > get_size(block))
+    {
+        void *new_pp = sf_malloc(rsize);
+        memcpy(new_pp, pp, get_size(block));
+        sf_free(pp);
+        return (void *)new_pp;
+    }
+
+    return (void *)pp;
 }
 
 double sf_fragmentation()
