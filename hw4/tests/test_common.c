@@ -77,7 +77,7 @@ int run_using_system(char *name, char *pre_cmd, char *valgrind_cmd,
         setup_test(name);
         int staterr = stat(test_infile, &sbuf);
         NEWSTREAM(f, s, cmd);
-        fprintf(f, "%s%s%s "PROGNAME" %s < %s | tee %s 2| tee %s",
+        fprintf(f, "%s%s%s "PROGNAME" %s < %s > %s 2> %s",
                 limits, pre_cmd, valgrind_cmd,
                 program_options,
                 staterr ? "/dev/null" : test_infile,
