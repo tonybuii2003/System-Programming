@@ -6,6 +6,8 @@
 extern volatile sig_atomic_t flag_exit;
 
 void signal_handler(int sig);
+int count_total_arg(char *str);
+void print_error_with_line(char *line);
 
 long options;
 
@@ -21,6 +23,7 @@ long options;
 #define PEEK_OPTION 10
 #define POKE_OPTION 11
 #define BT_OPTION 12
+#define OTHER_OPTION 13
 
 #define MAX_INPUT 2048
 #endif

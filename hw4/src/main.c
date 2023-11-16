@@ -30,9 +30,13 @@ int main(int argc, char *argv[])
         write(1, "deet> ", strlen("deet> "));
         fflush(stdout);
         readval = getline(&line, &size, stdin);
+        if (readval == 1)
+        {
+            continue;
+        }
         if (readval == -1)
         {
-            log_error("\n?\n");
+            log_error("\n?");
             if (errno == EINTR)
                 continue;
             else if (feof(stdin))
@@ -52,6 +56,7 @@ int main(int argc, char *argv[])
         // COMPUTE THE ARGS
         char *ptr_input;
         char *input = strtok_r(line, " ", &ptr_input);
+
         if (input != NULL)
         {
             if (strcmp(input, "help") == 0)
@@ -60,10 +65,113 @@ int main(int argc, char *argv[])
             }
             else if (strcmp(input, "quit") == 0)
             {
+                if (count_total_arg(ptr_input) > 0)
+                {
+                    print_error_with_line(line);
+                    continue;
+                }
                 options = QUIT_OPTION;
             }
+            else if (strcmp(input, "run") == 0)
+            {
+                if (count_total_arg(ptr_input) < 1)
+                {
+                    print_error_with_line(line);
+                    continue;
+                }
+                options = RUN_OPTION;
+            }
+            else if (strcmp(input, "show") == 0)
+            {
+                if (count_total_arg(ptr_input) > 1)
+                {
+                    print_error_with_line(line);
+                    continue;
+                }
+                options = SHOW_OPTION;
+            }
+            else if (strcmp(input, "stop") == 0)
+            {
+                if (count_total_arg(ptr_input) != 1)
+                {
+                    print_error_with_line(line);
+                    continue;
+                }
+                options = STOP_OPTION;
+            }
+            else if (strcmp(input, "cont") == 0)
+            {
+                if (count_total_arg(ptr_input) != 1)
+                {
+                    print_error_with_line(line);
+                    continue;
+                }
+                options = CONT_OPTION;
+            }
+            else if (strcmp(input, "release") == 0)
+            {
+                if (count_total_arg(ptr_input) != 1)
+                {
+                    print_error_with_line(line);
+                    continue;
+                }
+                options = RELEASE_OPTION;
+            }
+            else if (strcmp(input, "wait") == 0)
+            {
+                if (count_total_arg(ptr_input) != 1 && count_total_arg(ptr_input) != 2)
+                {
+                    print_error_with_line(line);
+                    continue;
+                }
+                options = WAIT_OPTION;
+            }
+            else if (strcmp(input, "kill") == 0)
+            {
+                if (count_total_arg(ptr_input) != 1)
+                {
+                    print_error_with_line(line);
+                    continue;
+                }
+                options = KILL_OPTION;
+            }
+            else if (strcmp(input, "peek") == 0)
+            {
+                if (count_total_arg(ptr_input) != 2 && count_total_arg(ptr_input) != 3)
+                {
+                    print_error_with_line(line);
+                    continue;
+                }
+                options = PEEK_OPTION;
+            }
+            else if (strcmp(input, "poke") == 0)
+            {
+                if (count_total_arg(ptr_input) != 3)
+                {
+                    print_error_with_line(line);
+                    continue;
+                }
+                options = POKE_OPTION;
+            }
+            else if (strcmp(input, "bt") == 0)
+            {
+                if (count_total_arg(ptr_input) != 1 && count_total_arg(ptr_input) != 2)
+                {
+                    print_error_with_line(line);
+                    continue;
+                }
+                options = BT_OPTION;
+            }
         }
-
+        size_t token_size = count_total_arg(ptr_input) + 1;
+        char *args_token[token_size];
+        int token_index = 0;
+        char *curr_token = strtok_r(NULL, " ", &ptr_input);
+        while (curr_token != NULL && token_index < token_size)
+        {
+            args_token[token_index++] = curr_token;
+            curr_token = strtok_r(NULL, " ", &ptr_input);
+        }
         // RUN
         if (options == HELP_OPTION)
         {
@@ -86,6 +194,7 @@ int main(int argc, char *argv[])
         }
         else if (options == QUIT_OPTION)
         {
+
             // sent SIGKILL to all existing processes that it is managing and it has
             // learned (via SIGCHLD/waitpid()) that those processes have actually terminated.
             // As soon as all extant processes have entered the PSTATE_DEAD state, then deet
@@ -93,6 +202,19 @@ int main(int argc, char *argv[])
 
             log_shutdown();
             break;
+        }
+        else if (options == RUN_OPTION)
+        {
+            pid_t pid = fork();
+            if (pid < 0)
+            {
+                log_error("\n?");
+                exit(EXIT_FAILURE);
+            }
+            else if (pid == 0)
+            {
+                execvp(args_token[0], args_token);
+            }
         }
         else
         {
