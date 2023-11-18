@@ -5,7 +5,7 @@
 
 typedef struct
 {
-    int index;
+    int process_index;
     pid_t pid;
     int is_traced;
     char *current_state;
@@ -22,4 +22,6 @@ process_info *get_process(int index);
 int kill_program(process_info *pinfo);
 void free_process(process_info *pinfo);
 void update_process(process_info *pinfo);
+int get_process_index();
+void remove_process(process_info *pinfo);
 #endif

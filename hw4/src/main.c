@@ -49,7 +49,24 @@ int main(int argc, char *argv[])
                 // learned (via SIGCHLD/waitpid()) that those processes have actually terminated.
                 // As soon as all extant processes have entered the PSTATE_DEAD state, then deet
                 // will itself terminate without undue delay
+                for (int i = 0; i <= get_process_index(); i++)
+                {
+                    current_process = get_process(i);
+                    if (current_process->is_init != 0)
+                    {
+                        kill_program(current_process);
 
+                        while (child_done == 0)
+                        {
+                        }
+                        if (child_done == 1)
+                        {
+                            child_done = 0;
+                            update_process(current_process);
+                            remove_process(current_process);
+                        }
+                    }
+                }
                 break;
             }
             log_error("\n?");
@@ -209,7 +226,25 @@ int main(int argc, char *argv[])
             // learned (via SIGCHLD/waitpid()) that those processes have actually terminated.
             // As soon as all extant processes have entered the PSTATE_DEAD state, then deet
             // will itself terminate without undue delay
+            while (get_process_index() >= 0)
+            {
 
+                current_process = get_process(0);
+                if (current_process->is_init != 0)
+                {
+                    kill_program(current_process);
+
+                    while (child_done == 0)
+                    {
+                    }
+                    if (child_done == 1)
+                    {
+                        child_done = 0;
+                        update_process(current_process);
+                        remove_process(current_process);
+                    }
+                }
+            }
             break;
         }
         else if (options == RUN_OPTION)
@@ -274,6 +309,7 @@ int main(int argc, char *argv[])
                 {
                     child_done = 0;
                     update_process(current_process);
+                    remove_process(current_process);
                 }
             }
         }
