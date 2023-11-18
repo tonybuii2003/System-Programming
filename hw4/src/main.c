@@ -8,12 +8,11 @@
 #include <sys/ptrace.h>
 #include <sys/wait.h>
 #include <errno.h>
-process_info *current_process;
 process_info *current_process = NULL;
 
 int main(int argc, char *argv[])
 {
-    current_process = malloc(sizeof(process_info));
+    // current_process = malloc(sizeof(process_info));
     log_startup();
     // TO BE IMPLEMENTED
     // Remember: Do not put any functions other than main() in this file.
@@ -54,6 +53,7 @@ int main(int argc, char *argv[])
                 break;
             }
             log_error("\n?");
+            continue;
         }
         log_input(line);
         line[readval - 1] = '\0';
@@ -257,14 +257,19 @@ int main(int argc, char *argv[])
             current_process = get_process(kill_index);
             if (current_process != NULL)
             {
-                kill_program(current_process);
+                if (kill_program(current_process) == -1)
+                {
+                    print_error_with_line(line);
+                    continue;
+                }
+
                 while (child_done == 0)
                 {
                 }
                 if (child_done == 1)
                 {
                     child_done = 0;
-                    update_process();
+                    update_process(current_process);
                 }
             }
         }

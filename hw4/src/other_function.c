@@ -51,7 +51,7 @@ process_info *put_process(pid_t pid, char is_traced, char *current_state, char *
     // create new  process
     process_info *pinfo = malloc(sizeof(process_info));
     pinfo->pid = pid;
-    pinfo->is_dead = 0;
+    pinfo->is_init = 1;
     pinfo->is_traced = is_traced;
     pinfo->current_state = malloc(strlen(current_state) + 1);
     if (pinfo->current_state != NULL)
@@ -69,7 +69,7 @@ process_info *put_process(pid_t pid, char is_traced, char *current_state, char *
     process_index++;
     return pinfo;
 }
-void update_process()
+void update_process(process_info *pinfo)
 {
     int status;
     pid_t pid;
@@ -79,16 +79,21 @@ void update_process()
         if (WIFSTOPPED(status))
         {
             log_state_change(pid, PSTATE_RUNNING, PSTATE_STOPPED, WSTOPSIG(status));
-            // current_process->status = WSTOPSIG(status);
+            pinfo->status = WSTOPSIG(status);
+            printf("stop status: %d\n", pinfo->status);
         }
         else if (WIFEXITED(status))
         {
             log_state_change(pid, PSTATE_KILLED, PSTATE_DEAD, WEXITSTATUS(status));
+            pinfo->status = WEXITSTATUS(status);
+            printf("kill status: %d\n", pinfo->status);
             // Update current_process for an exited child
         }
         else if (WIFSIGNALED(status))
         {
             log_state_change(pid, PSTATE_KILLED, PSTATE_DEAD, WTERMSIG(status));
+            pinfo->status = WTERMSIG(status);
+            printf("dead status: %d\n", pinfo->status);
             // Update current_process for a signaled child
         }
     }
@@ -112,7 +117,7 @@ void free_process_list()
 void print_process(process_info *pinfo)
 {
     printf("status: %d\n", pinfo->status);
-    if (pinfo->is_dead == 1)
+    if (pinfo->status == 0x9)
     {
         printf("%d\t%d\t%c\t%s\t0x%x\t%s\n", pinfo->index, pinfo->pid, pinfo->is_traced, pinfo->current_state, pinfo->status, pinfo->prompt);
     }
@@ -129,9 +134,13 @@ void print_process_list()
         print_process(pinfo);
     }
 }
-void kill_program(process_info *pinfo)
+int kill_program(process_info *pinfo)
 {
-
+    if (pinfo->is_init == 0)
+    {
+        return -1;
+    }
     log_state_change(pinfo->pid, PSTATE_RUNNING, PSTATE_KILLED, 0);
     kill(pinfo->pid, SIGKILL);
+    return 0;
 }
