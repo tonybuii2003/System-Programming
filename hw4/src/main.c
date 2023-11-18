@@ -2,31 +2,36 @@
 #include <stdio.h>
 #include "deet.h"
 #include "global.h"
+#include "other_function.h"
 #include <string.h>
 #include <unistd.h>
+#include <sys/ptrace.h>
+#include <sys/wait.h>
 #include <errno.h>
+process_info *current_process;
+process_info *current_process = NULL;
 
 int main(int argc, char *argv[])
 {
+    current_process = malloc(sizeof(process_info));
     log_startup();
     // TO BE IMPLEMENTED
     // Remember: Do not put any functions other than main() in this file.
-    struct sigaction action;
-    action.sa_handler = signal_handler;
-    sigemptyset(&action.sa_mask);
-    action.sa_flags = 0;
-    if (sigaction(SIGINT, &action, NULL) == -1)
+    struct sigaction action_int, action_child;
+    action_int.sa_handler = int_signal_handler;
+    sigemptyset(&action_int.sa_mask);
+    action_int.sa_flags = 0;
+    if (sigaction(SIGINT, &action_int, NULL) == -1)
     {
         exit(EXIT_FAILURE);
     }
 
     while (!flag_exit)
     {
-        log_prompt();
         char *line = NULL;
         size_t size = MAX_INPUT + 1;
         ssize_t readval;
-
+        log_prompt();
         write(1, "deet> ", strlen("deet> "));
         fflush(stdout);
         readval = getline(&line, &size, stdin);
@@ -36,7 +41,7 @@ int main(int argc, char *argv[])
         }
         if (readval == -1)
         {
-            log_error("\n?");
+
             if (errno == EINTR)
                 continue;
             else if (feof(stdin))
@@ -46,9 +51,9 @@ int main(int argc, char *argv[])
                 // As soon as all extant processes have entered the PSTATE_DEAD state, then deet
                 // will itself terminate without undue delay
 
-                log_shutdown();
                 break;
             }
+            log_error("\n?");
         }
         log_input(line);
         line[readval - 1] = '\0';
@@ -56,7 +61,11 @@ int main(int argc, char *argv[])
         // COMPUTE THE ARGS
         char *ptr_input;
         char *input = strtok_r(line, " ", &ptr_input);
-
+        char *prompt = malloc(strlen(ptr_input) + 1);
+        if (prompt != NULL)
+        {
+            strcpy(prompt, ptr_input);
+        }
         if (input != NULL)
         {
             if (strcmp(input, "help") == 0)
@@ -167,11 +176,12 @@ int main(int argc, char *argv[])
         char *args_token[token_size];
         int token_index = 0;
         char *curr_token = strtok_r(NULL, " ", &ptr_input);
-        while (curr_token != NULL && token_index < token_size)
+        while (curr_token != NULL)
         {
             args_token[token_index++] = curr_token;
             curr_token = strtok_r(NULL, " ", &ptr_input);
         }
+        args_token[token_index] = NULL;
         // RUN
         if (options == HELP_OPTION)
         {
@@ -200,11 +210,17 @@ int main(int argc, char *argv[])
             // As soon as all extant processes have entered the PSTATE_DEAD state, then deet
             // will itself terminate without undue delay
 
-            log_shutdown();
             break;
         }
         else if (options == RUN_OPTION)
         {
+            action_child.sa_handler = child_signal_handler;
+            sigemptyset(&action_child.sa_mask);
+            action_child.sa_flags = SA_RESTART;
+            if (sigaction(SIGCHLD, &action_child, NULL) == -1)
+            {
+                exit(EXIT_FAILURE);
+            }
             pid_t pid = fork();
             if (pid < 0)
             {
@@ -213,20 +229,56 @@ int main(int argc, char *argv[])
             }
             else if (pid == 0)
             {
+                // child
+                // 1) redirect
+                dup2(STDERR_FILENO, STDOUT_FILENO);
+                // 2) start ptrace, child stop here?
+                ptrace(PTRACE_TRACEME, 0, NULL, NULL);
+                // 3) execute the command
                 execvp(args_token[0], args_token);
             }
+            else
+            {
+                // parent
+                log_state_change(pid, PSTATE_NONE, PSTATE_RUNNING, 0);
+                current_process = put_process(pid, 'T', "running", prompt);
+                // 1) wait for child to stop (when signal is caught)
+                while (child_done == 0)
+                {
+                }
+                if (child_done == 1)
+                    child_done = 0;
+                set_process(current_process, "stopped");
+            }
+        }
+        else if (options == KILL_OPTION)
+        {
+            int kill_index = atoi(args_token[0]);
+            current_process = get_process(kill_index);
+            if (current_process != NULL)
+            {
+                kill_program(current_process);
+                while (child_done == 0)
+                {
+                }
+                if (child_done == 1)
+                {
+                    child_done = 0;
+                    update_process();
+                }
+            }
+        }
+        else if (options == SHOW_OPTION)
+        {
         }
         else
         {
             // other options
-            size_t msg_length = strlen(line) + strlen("\n?") + 1;
-            char *msg = malloc(msg_length);
-            strcpy(msg, line);
-            strcat(msg, "\n?");
-            log_error(msg);
-            free(msg);
+            print_error_with_line(line);
         }
         free(line);
     }
+    free_process_list();
+    log_shutdown();
     return 0;
 }

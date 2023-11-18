@@ -5,10 +5,9 @@
 #include <signal.h>
 #include "deet.h"
 
-// BEGIN SIGNAL HANDLER
 volatile sig_atomic_t flag_exit = 0;
-
-void signal_handler(int sig)
+volatile sig_atomic_t child_done = 0;
+void int_signal_handler(int sig)
 {
     log_signal(sig);
     if (sig == SIGINT)
@@ -16,4 +15,12 @@ void signal_handler(int sig)
         flag_exit = 1;
     }
 }
-// END SIGNAL HANDLER
+
+void child_signal_handler(int sig)
+{
+    log_signal(sig);
+    if (sig == SIGCHLD)
+    {
+        child_done = 1;
+    }
+}

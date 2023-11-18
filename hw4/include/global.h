@@ -4,11 +4,12 @@
 #include <signal.h>
 
 extern volatile sig_atomic_t flag_exit;
+extern volatile sig_atomic_t child_done;
 
-void signal_handler(int sig);
+void int_signal_handler(int sig);
+void child_signal_handler(int sig);
 int count_total_arg(char *str);
 void print_error_with_line(char *line);
-
 long options;
 
 #define HELP_OPTION 1
