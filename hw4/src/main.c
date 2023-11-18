@@ -49,9 +49,10 @@ int main(int argc, char *argv[])
                 // learned (via SIGCHLD/waitpid()) that those processes have actually terminated.
                 // As soon as all extant processes have entered the PSTATE_DEAD state, then deet
                 // will itself terminate without undue delay
-                for (int i = 0; i <= get_process_index(); i++)
+                while (get_process_index() >= 0)
                 {
-                    current_process = get_process(i);
+
+                    current_process = get_process(0);
                     if (current_process->is_init != 0)
                     {
                         kill_program(current_process);
