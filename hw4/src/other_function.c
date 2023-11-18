@@ -44,7 +44,6 @@ void print_error_with_line(char *line)
 void set_process(process_info *pinfo, char *current_state)
 {
     pinfo->current_state = current_state;
-    print_process(pinfo);
 }
 process_info *put_process(pid_t pid, char is_traced, char *current_state, char *prompt)
 {
@@ -65,8 +64,9 @@ process_info *put_process(pid_t pid, char is_traced, char *current_state, char *
     }
     process_list[process_index] = *pinfo;
     pinfo->index = process_index;
-    print_process(pinfo);
+
     process_index++;
+    print_process(pinfo);
     return pinfo;
 }
 void update_process(process_info *pinfo)
@@ -80,21 +80,28 @@ void update_process(process_info *pinfo)
         {
             log_state_change(pid, PSTATE_RUNNING, PSTATE_STOPPED, WSTOPSIG(status));
             pinfo->status = WSTOPSIG(status);
-            printf("stop status: %d\n", pinfo->status);
+            // printf("stop status: %d\n", pinfo->status);
+            set_process(pinfo, "stopped");
+            print_process(pinfo);
         }
         else if (WIFEXITED(status))
         {
             log_state_change(pid, PSTATE_KILLED, PSTATE_DEAD, WEXITSTATUS(status));
             pinfo->status = WEXITSTATUS(status);
-            printf("kill status: %d\n", pinfo->status);
-            // Update current_process for an exited child
+            // printf("kill status: %d\n", pinfo->status);
+            set_process(pinfo, "dead");
+            print_process(pinfo);
         }
         else if (WIFSIGNALED(status))
         {
+            log_state_change(pinfo->pid, PSTATE_STOPPED, PSTATE_KILLED, 0);
+            set_process(pinfo, "killed");
+            print_process(pinfo);
             log_state_change(pid, PSTATE_KILLED, PSTATE_DEAD, WTERMSIG(status));
             pinfo->status = WTERMSIG(status);
-            printf("dead status: %d\n", pinfo->status);
-            // Update current_process for a signaled child
+            // printf("dead status: %d\n", pinfo->status);
+            set_process(pinfo, "dead");
+            print_process(pinfo);
         }
     }
 }
@@ -116,7 +123,7 @@ void free_process_list()
 }
 void print_process(process_info *pinfo)
 {
-    printf("status: %d\n", pinfo->status);
+    // printf("status: %d\n", pinfo->status);
     if (pinfo->status == 0x9)
     {
         printf("%d\t%d\t%c\t%s\t0x%x\t%s\n", pinfo->index, pinfo->pid, pinfo->is_traced, pinfo->current_state, pinfo->status, pinfo->prompt);
@@ -140,7 +147,8 @@ int kill_program(process_info *pinfo)
     {
         return -1;
     }
-    log_state_change(pinfo->pid, PSTATE_RUNNING, PSTATE_KILLED, 0);
+
     kill(pinfo->pid, SIGKILL);
+    process_index--;
     return 0;
 }

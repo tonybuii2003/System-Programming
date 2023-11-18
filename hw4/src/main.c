@@ -241,14 +241,18 @@ int main(int argc, char *argv[])
             {
                 // parent
                 log_state_change(pid, PSTATE_NONE, PSTATE_RUNNING, 0);
+
                 current_process = put_process(pid, 'T', "running", prompt);
+
                 // 1) wait for child to stop (when signal is caught)
                 while (child_done == 0)
                 {
                 }
                 if (child_done == 1)
+                {
                     child_done = 0;
-                set_process(current_process, "stopped");
+                    update_process(current_process);
+                }
             }
         }
         else if (options == KILL_OPTION)
