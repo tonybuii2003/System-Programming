@@ -316,6 +316,33 @@ int main(int argc, char *argv[])
         }
         else if (options == SHOW_OPTION)
         {
+            int show_index = atoi(args_token[0]);
+            current_process = get_process(show_index);
+            if (current_process->is_init == 0)
+            {
+                print_error_with_line(line);
+                continue;
+            }
+            print_process(current_process);
+        }
+        else if (options == CONT_OPTION)
+        {
+            int cont_index = atoi(args_token[0]);
+            current_process = get_process(cont_index);
+            if (cont_program(current_process) == -1)
+            {
+                print_error_with_line(line);
+                continue;
+            }
+            while (child_done == 0)
+            {
+            }
+            if (child_done == 1)
+            {
+                child_done = 0;
+                update_process(current_process);
+                remove_process(current_process);
+            }
         }
         else
         {
