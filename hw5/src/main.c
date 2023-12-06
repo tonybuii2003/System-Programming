@@ -11,6 +11,10 @@ static void terminate(int status);
 CLIENT_REGISTRY *client_registry;
 int main(int argc, char *argv[])
 {
+    if (argc <= 1)
+    {
+        exit(EXIT_SUCCESS);
+    }
     struct sigaction action_sighup;
     memset(&action_sighup, 0, sizeof(action_sighup));
     action_sighup.sa_handler = sighup_signal_handler;
@@ -39,7 +43,7 @@ int main(int argc, char *argv[])
     if (port <= 0)
     {
         fprintf(stderr, "Invalid port number.\n");
-        exit(EXIT_SUCCESS);
+        exit(EXIT_FAILURE);
     }
     // Perform required initializations of the client_registry,
     // transaction manager, and object store.
