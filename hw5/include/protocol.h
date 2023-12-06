@@ -9,7 +9,6 @@
  */
 #ifndef PROTOCOL_H
 #define PROTOCOL_H
-
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
@@ -37,7 +36,7 @@
  *   COMMIT:  Try to commit a transaction
  *            (sends request serial #)
  *            (reply echoes serial # and returns status)
- * 
+ *
  * Server-to-client responses:
  *   REPLY:
  *            (echoes request serial #, returns status and possibly also
@@ -61,23 +60,29 @@
 /*
  * Packet types.
  */
-typedef enum {
-    XACTO_NO_PKT,  // Not used
-    XACTO_PUT_PKT, XACTO_GET_PKT, XACTO_KEY_PKT, XACTO_VALUE_PKT, XACTO_COMMIT_PKT,
+typedef enum
+{
+    XACTO_NO_PKT, // Not used
+    XACTO_PUT_PKT,
+    XACTO_GET_PKT,
+    XACTO_KEY_PKT,
+    XACTO_VALUE_PKT,
+    XACTO_COMMIT_PKT,
     XACTO_REPLY_PKT
 } XACTO_PACKET_TYPE;
 
 /*
  * Structure of a packet.
  */
-typedef struct {
-    uint8_t type;		   // Type of the packet
-    uint8_t status;                // Status (in reply packet)
-    uint8_t null;                  // Whether payload is NULL (in data packet)
-    uint32_t serial;		   // Serial # of the associated request
-    uint32_t size;                 // Payload size (for data packet)
-    uint32_t timestamp_sec;        // Seconds field of time packet was sent
-    uint32_t timestamp_nsec;       // Nanoseconds field of time packet was sent
+typedef struct
+{
+    uint8_t type;            // Type of the packet
+    uint8_t status;          // Status (in reply packet)
+    uint8_t null;            // Whether payload is NULL (in data packet)
+    uint32_t serial;         // Serial # of the associated request
+    uint32_t size;           // Payload size (for data packet)
+    uint32_t timestamp_sec;  // Seconds field of time packet was sent
+    uint32_t timestamp_nsec; // Nanoseconds field of time packet was sent
 } XACTO_PACKET;
 
 /*
