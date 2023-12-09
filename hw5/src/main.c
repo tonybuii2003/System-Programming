@@ -73,6 +73,7 @@ int main(int argc, char *argv[])
             continue;
         }
         pthread_create(&tid, NULL, xacto_client_service, connfd);
+        // pthread_create(&tid2, NULL, xacto_client_service, connfd);
     }
     terminate(EXIT_SUCCESS);
     fprintf(stderr, "You have to finish implementing main() "

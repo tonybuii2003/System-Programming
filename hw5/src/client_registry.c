@@ -1,5 +1,6 @@
 #include "client_registry.h"
 #include "csapp.h"
+#include "debug.h"
 
 typedef struct client_registry
 {
@@ -29,6 +30,7 @@ CLIENT_REGISTRY *creg_init()
     }
     pthread_mutex_init(&cr->mutex, NULL);
     sem_init(&cr->semaphore, 0, 0);
+    debug("Initialize client registry");
     return cr;
 }
 void creg_fini(CLIENT_REGISTRY *cr)
@@ -37,6 +39,7 @@ void creg_fini(CLIENT_REGISTRY *cr)
     sem_destroy(&cr->semaphore);
     Free(cr->client_fds);
     Free(cr);
+    debug("Finalize client registry");
 }
 int creg_register(CLIENT_REGISTRY *cr, int fd)
 {
@@ -56,6 +59,7 @@ int creg_register(CLIENT_REGISTRY *cr, int fd)
         }
     }
     pthread_mutex_unlock(&cr->mutex);
+    debug("Register client fd %d (total connected: %d)", fd, cr->client_count);
     return 0;
 }
 int creg_unregister(CLIENT_REGISTRY *cr, int fd)
@@ -75,6 +79,7 @@ int creg_unregister(CLIENT_REGISTRY *cr, int fd)
         }
     }
     pthread_mutex_unlock(&cr->mutex);
+    debug("Unregister client fd %d (total connected: %d)", fd, cr->client_count);
     return 0;
 }
 void creg_wait_for_empty(CLIENT_REGISTRY *cr)
