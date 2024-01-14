@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "allocate.h": "c",
+        "gradedb.h": "c",
+        "random": "c",
+        "limits": "c",
+        "algorithm": "c",
+        "write.h": "c"
+    }
+}

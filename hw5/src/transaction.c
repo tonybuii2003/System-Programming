@@ -65,10 +65,8 @@ void trans_unref(TRANSACTION *tp, char *why)
         pthread_mutex_unlock(&tp->mutex);
         trans_fini();
     }
-    else
-    {
-        pthread_mutex_unlock(&tp->mutex);
-    }
+
+    pthread_mutex_unlock(&tp->mutex);
 }
 
 void trans_add_dependency(TRANSACTION *tp, TRANSACTION *dtp)

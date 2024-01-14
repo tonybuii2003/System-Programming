@@ -187,7 +187,7 @@ Stats *s;
         }
         else
         {
-          fprintf(fd, "%3.2f", r); // change ***.** to  3.2f
+          fprintf(fd, "***.**"); // change ***.** to  3.2f
         }
         fprintf(fd, "\n");
       }

@@ -5,42 +5,50 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <wait.h>
-
-static void init() {
+#include "client_registry.h"
+#include "protocol.h"
+CLIENT_REGISTRY *client_registry;
+static void init()
+{
 #ifndef NO_SERVER
     int ret;
     int i = 0;
-    do { // Wait for server to start
-	ret = system("netstat -an | fgrep '0.0.0.0:9999' > /dev/null");
-	sleep(1);
-    } while(++i < 30 && WEXITSTATUS(ret));
+    do
+    { // Wait for server to start
+        ret = system("netstat -an | fgrep '0.0.0.0:9999' > /dev/null");
+        sleep(1);
+    } while (++i < 30 && WEXITSTATUS(ret));
 #endif
 }
 
-static void fini() {
+static void fini()
+{
 }
 
 /*
  * Thread to run a command using system() and collect the exit status.
  */
-void *system_thread(void *arg) {
+void *system_thread(void *arg)
+{
     long ret = system((char *)arg);
     return (void *)ret;
 }
 
 // Criterion seems to sort tests by name.  This one can't be delayed
 // or others will time out.
-Test(student_suite, 00_start_server, .timeout = 30) {
+Test(student_suite, 00_start_server, .timeout = 30)
+{
     fprintf(stderr, "server_suite/00_start_server\n");
     int server_pid = 0;
     int ret = system("netstat -an | fgrep '0.0.0.0:9999' > /dev/null");
     cr_assert_neq(WEXITSTATUS(ret), 0, "Server was already running");
     fprintf(stderr, "Starting server...");
-    if((server_pid = fork()) == 0) {
-	execlp("valgrind", "xacto", "--leak-check=full", "--track-fds=yes",
-	       "--error-exitcode=37", "--log-file=valgrind.out", "bin/xacto", "-p", "9999", NULL);
-	fprintf(stderr, "Failed to exec server\n");
-	abort();
+    if ((server_pid = fork()) == 0)
+    {
+        execlp("valgrind", "xacto", "--leak-check=full", "--track-fds=yes",
+               "--error-exitcode=37", "--log-file=valgrind.out", "bin/xacto", "-p", "9999", NULL);
+        fprintf(stderr, "Failed to exec server\n");
+        abort();
     }
     fprintf(stderr, "pid = %d\n", server_pid);
     char *cmd = "sleep 10";
@@ -54,20 +62,78 @@ Test(student_suite, 00_start_server, .timeout = 30) {
     kill(server_pid, SIGKILL);
     wait(&ret);
     fprintf(stderr, "Server wait() returned = 0x%x\n", ret);
-    if(WIFSIGNALED(ret)) {
-	fprintf(stderr, "Server terminated with signal %d\n", WTERMSIG(ret));	
-	system("cat valgrind.out");
-	if(WTERMSIG(ret) == 9)
-	    cr_assert_fail("Server did not terminate after SIGHUP");
+    if (WIFSIGNALED(ret))
+    {
+        fprintf(stderr, "Server terminated with signal %d\n", WTERMSIG(ret));
+        system("cat valgrind.out");
+        if (WTERMSIG(ret) == 9)
+            cr_assert_fail("Server did not terminate after SIGHUP");
     }
-    if(WEXITSTATUS(ret) == 37)
-	system("cat valgrind.out");
+    if (WEXITSTATUS(ret) == 37)
+        system("cat valgrind.out");
     cr_assert_neq(WEXITSTATUS(ret), 37, "Valgrind reported errors");
     cr_assert_eq(WEXITSTATUS(ret), 0, "Server exit status was not 0");
 }
 
-Test(student_suite, 01_connect, .init = init, .fini = fini, .timeout = 5) {
+Test(student_suite, 01_connect, .init = init, .fini = fini, .timeout = 5)
+{
     fprintf(stderr, "server_suite/01_connect\n");
     int ret = system("util/client -p 9999 </dev/null | grep 'Connected to server'");
     cr_assert_eq(ret, 0, "expected %d, was %d\n", 0, ret);
+}
+void *register_and_unregister_client(void *arg)
+{
+    int fd = *(int *)arg;
+    creg_register(client_registry, fd);
+    sleep(1); // Simulate some processing time
+    creg_unregister(client_registry, fd);
+    return NULL;
+}
+
+// Thread function to call creg_wait_for_empty
+void *wait_for_empty(void *arg)
+{
+    creg_wait_for_empty(client_registry);
+    return NULL;
+}
+
+Test(student_suite, 02_concurrent_client_registrations, .timeout = 10)
+{
+    const int NUM_THREADS = 10;
+    pthread_t threads[NUM_THREADS];
+    pthread_t wait_thread;
+    int fds[NUM_THREADS];
+
+    // Initialize the client registry
+    client_registry = creg_init();
+
+    // Prepare file descriptors (dummy fds for the test)
+    for (int i = 0; i < NUM_THREADS; i++)
+    {
+        fds[i] = i;
+    }
+
+    // Start the wait_for_empty thread
+    pthread_create(&wait_thread, NULL, wait_for_empty, NULL);
+
+    // Create threads for concurrent client registration and unregistration
+    for (int i = 0; i < NUM_THREADS; i++)
+    {
+        pthread_create(&threads[i], NULL, register_and_unregister_client, &fds[i]);
+    }
+
+    // Wait for all registration/unregistration threads to finish
+    for (int i = 0; i < NUM_THREADS; i++)
+    {
+        pthread_join(threads[i], NULL);
+    }
+
+    // Now, wait for the wait_for_empty thread to finish
+    pthread_join(wait_thread, NULL);
+
+    // The wait_for_empty thread should have returned after all clients were unregistered
+    // cr_assert(creg_get_registered_count(client_registry) == 0, "creg_wait_for_empty did not work as expected");
+
+    // Clean up the client registry
+    creg_fini(client_registry);
 }

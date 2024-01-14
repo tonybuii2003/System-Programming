@@ -190,9 +190,7 @@ Test(sfmm_basecode_suite, realloc_smaller_block_splinter, .timeout = TEST_TIMEOU
 
 Test(sfmm_basecode_suite, realloc_smaller_block_free_block, .timeout = TEST_TIMEOUT)
 {
-	printf("begin \n");
 	void *x = sf_malloc(sizeof(double) * 8);
-	printf("Got here \n");
 	void *y = sf_realloc(x, sizeof(int));
 
 	cr_assert_not_null(y, "y is NULL!");
