@@ -16,4 +16,4 @@ I became a debugging maestro by designing my own custom debugger. Exploring the 
 
 ## Homework 5: Building a Thread-Based Websocket Database Server
 
-Harnessing my knowledge of system programming, I implemented a robust thread-based websocket server. Creating a dynamic environment where a server seamlessly interacted with multiple clients through threads, this assignment showcased my prowess in designing scalable and concurrent systems.
+Harnessing my knowledge of system programming, I implemented a robust thread-based websocket database server. Creating a dynamic environment where a server seamlessly interacted with multiple clients through threads to hash and store data, this assignment showcased my prowess in designing scalable and concurrent systems.
