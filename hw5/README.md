@@ -32,7 +32,7 @@
 <div align="center">
 
 
-<h3 align="center">Thread-Based Websocket Database Server</h3>
+<h3 align="center">Simple Thread-Based Websocket Database Server</h3>
 
   <p align="center">
     A scalable thread-based websocket server, allowing clients to put and get data
