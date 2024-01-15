@@ -65,7 +65,6 @@ Developed one of the most unique projects during my university course, a databas
 
 
 #### Built with: [![C](https://img.shields.io/badge/language-C-blue.svg)](https://en.wikipedia.org/wiki/C_(programming_language))
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 
@@ -127,19 +126,10 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 - [x] Client Service Thread
 - [ ] Transaction Manager
 - [ ] Transactional Store
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-
-
 <!-- LICENSE -->
 ## License
 
 Distributed under the GNU AFFERO GENERAL PUBLIC License. See `LICENSE.txt` for more information.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 
@@ -147,8 +137,6 @@ Distributed under the GNU AFFERO GENERAL PUBLIC License. See `LICENSE.txt` for m
 ## Contact
 
 Phi Long Bui - tonybui5503@gmail.com
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 
