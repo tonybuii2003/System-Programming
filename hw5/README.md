@@ -125,10 +125,6 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 - [x] Client Service Thread
 - [ ] Transaction Manager
 - [ ] Transactional Store
-<!-- LICENSE -->
-## License
-
-Distributed under the GNU AFFERO GENERAL PUBLIC License. See `LICENSE.txt` for more information.
 
 
 
